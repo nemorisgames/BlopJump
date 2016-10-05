@@ -22,7 +22,7 @@ public class MainController : MonoBehaviour {
 	void Start () 
 	{
 		unlockables = new Dictionary<int,Unlockable> ();
-		LoadDictionaries ();
+		LoadUnlockables ();
 		rewardMachine.LoadTier ();
 		Debug.Log ("Presiona 'L' para ver lista de items y estado, 'R' para desbloquear un item");
 	}
@@ -43,7 +43,7 @@ public class MainController : MonoBehaviour {
 	}
 
 	//carga datos de las listas expuestas en el inspector a los diccionarios
-	void LoadDictionaries()
+	void LoadUnlockables()
 	{
 		int count = 0;
 		foreach (Diver d in diverList) 

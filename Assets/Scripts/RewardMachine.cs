@@ -11,7 +11,7 @@ public class RewardMachine : MonoBehaviour {
 	public int [] tierCost = {250,300,500};
 	public int currentTier = 0;
 
-	public int remaining;
+	public int remainingUnlocks;
 
 	// Use this for initialization
 	void Start () 
@@ -22,7 +22,7 @@ public class RewardMachine : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-		remaining = availableRewards.Count;
+		remainingUnlocks = availableRewards.Count;
 
 		if (Input.GetKeyDown (KeyCode.R) && controller.testing) 
 		{
