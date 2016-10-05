@@ -38,16 +38,20 @@ public class RewardMachine : MonoBehaviour {
 	//intenta desbloquear un item
 	public void GetReward()
 	{
-		if (availableRewards.Count > 0) 
-		{
+		if (availableRewards.Count > 0 && controller.coins >= tierCost [currentTier]) {
 			int key = GetRandom ();
 			Unlockable u;
 			if (controller.unlockables.TryGetValue (key, out u)) 
 			{
 				UnlockItem (u, key);
 			};
-		} 
-		else 
+			controller.coins -= tierCost [currentTier];
+		}
+		else if (controller.coins < tierCost [currentTier]) 
+		{
+			Debug.Log ("Not enough coins!");
+		}
+		else
 		{
 			Debug.Log ("All items are unlocked!");
 		}

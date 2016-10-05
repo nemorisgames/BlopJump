@@ -9,7 +9,6 @@ public class MainController : MonoBehaviour {
 
 	[HideInInspector]
 	public int highScore;
-	[HideInInspector]
 	public int coins;
 
 	public Dictionary<int,Unlockable> unlockables;
