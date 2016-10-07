@@ -9,4 +9,18 @@ public class Diver : Unlockable
 	public float spinSpeed; //velocidad de giro del diver
 	public float trickSpinSpeed; //velocidad de giro del diver al realizar el truco
 
+	[HideInInspector]
+	public bool onGround = true;
+
+	void OnTriggerEnter(Collider other){
+		if(other.tag == "Blop"){
+			onGround = true;
+		};
+	}
+
+	void OnTriggerExit(Collider other){
+		if(other.tag == "Blop"){
+			onGround = false;
+		};
+	}
 }
