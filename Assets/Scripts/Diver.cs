@@ -12,7 +12,7 @@ public class Diver : Unlockable
 	[HideInInspector]
 	public bool onGround = true;
 
-	void OnTriggerEnter(Collider other){
+	/*void OnTriggerEnter(Collider other){
 		if(other.tag == "Blop"){
 			onGround = true;
 		};
@@ -22,5 +22,5 @@ public class Diver : Unlockable
 		if(other.tag == "Blop"){
 			onGround = false;
 		};
-	}
+	}*/
 }
