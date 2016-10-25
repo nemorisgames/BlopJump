@@ -8,6 +8,8 @@ public class GameController : MonoBehaviour
 	Transform diverPos;
 
 	public bool testing;
+	[HideInInspector]
+	public bool playing = true;
 
 	[Header("Diver")]
 	public GameObject diverGameObject; //diver en uso
@@ -56,44 +58,55 @@ public class GameController : MonoBehaviour
 	}
 
 	void FixedUpdate(){
+		if (playing) {
 
-		//when controlling Jumper
-		if (controllingJumper && !controllingDiver) 
-		{
-			if (Input.GetKeyDown (KeyCode.Space)) 
-			{
-				jumperRigidbody.AddForce (jumperJumpForce);
-				controllingJumper = false;
+			//when controlling Jumper
+			if (controllingJumper && !controllingDiver) {
+				if (Input.GetKeyDown (KeyCode.Space)) {
+					jumperRigidbody.AddForce (jumperJumpForce);
+					controllingJumper = false;
+				}
 			}
-		}
 
-		//when controlling Diver
-		if(!controllingJumper && controllingDiver){
-			if (diverProps.onGround) 
-			{
-				flips = 0;
-				WindupRotation = 0;
-				if(Input.GetKeyDown (KeyCode.Space) && testing)
-					DiverJump (diverJumpForce);
-			};
-			if (!diverProps.onGround) 
-			{
-				SetDiverSpinSpeed (diverProps.spinSpeed, diverProps.trickSpinSpeed);
-			};
-		}
+			//when controlling Diver
+			if (!controllingJumper && controllingDiver) {
+				if (diverProps.onGround) {
+					flips = 0;
+					WindupRotation = 0;
+					if (Input.GetKeyDown (KeyCode.Space) && testing)
+						DiverJump (diverJumpForce);
+				}
 
-		//Cleanup
-		if (diverRigidbody.position.y < -1) 
-		{
-			ResetRound ();
-			jumperRigidbody.position = jumperPos;
-			controllingJumper = true;
-			controllingDiver = false;
+				if (!diverProps.onGround) {
+					SetDiverSpinSpeed (diverProps.spinSpeed, diverProps.trickSpinSpeed);
+				}
+
+			}
+
+			//Cleanup
+			if (diverRigidbody.position.y < -1) {
+				ResetRound ();
+				jumperRigidbody.position = jumperPos;
+				controllingJumper = true;
+				controllingDiver = false;
+			}
 		}
 	}
 
-	void Setup()
+	public void Setup()
 	{
+		if (diver != null) {
+			Destroy (diver);
+		}
+
+		if(jumper != null){
+			Destroy(jumper);
+		}
+
+		if (platform != null) {
+			Destroy (platform);
+		}
+
 		//Set up diver
 		diverPos = transform.FindChild ("DiverPos").transform;
 
