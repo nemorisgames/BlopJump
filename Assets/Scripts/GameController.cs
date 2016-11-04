@@ -6,10 +6,16 @@ public class GameController : MonoBehaviour
 {
 
 	Transform diverPos;
+	Camera cam;
 
 	public bool testing;
 	[HideInInspector]
-	public bool playing = true;
+	public bool playing = false;
+	[HideInInspector]
+	public bool waiting = true;
+
+	public float windForce;
+	public float jumpHeightCompensate;
 
 	[Header("Diver")]
 	public GameObject diverGameObject; //diver en uso
@@ -37,7 +43,7 @@ public class GameController : MonoBehaviour
 	public Vector3 jumperJumpForce;
 	public float compensateWeightHorizontal;
 	public float compensateWeightVertical;
-	public float compensatePlatformHeight;
+
 
 	GameObject jumper;
 	bool controllingJumper;
@@ -47,27 +53,34 @@ public class GameController : MonoBehaviour
 
 	[Header("Platform")]
 	public GameObject platformGameObject;
+	public float compensatePlatformHeight;
 
 	GameObject platform;
 	Platform platformProps;
+	bool enableWind;
 
 	// Use this for initialization
 	void Awake () 
 	{
+		cam = Camera.main;
 		Setup ();
 	}
 
 	void FixedUpdate(){
-		if (playing) {
-
+		if (waiting) {
 			//when controlling Jumper
 			if (controllingJumper && !controllingDiver) {
 				if (Input.GetKeyDown (KeyCode.Space)) {
 					jumperRigidbody.AddForce (jumperJumpForce);
 					controllingJumper = false;
+					waiting = false;
+					playing = true;
 				}
 			}
+		}
 
+		if (playing) 
+		{
 			//when controlling Diver
 			if (!controllingJumper && controllingDiver) {
 				if (diverProps.onGround) {
@@ -83,29 +96,43 @@ public class GameController : MonoBehaviour
 
 			}
 
+			if(enableWind)
+				diverRigidbody.AddForce(new Vector3(-windForce,0f,0f));
+
 			//Cleanup
-			if (diverRigidbody.position.y < -1) {
-				ResetRound ();
-				jumperRigidbody.position = jumperPos;
-				controllingJumper = true;
-				controllingDiver = false;
-			}
+		}
+	}
+
+	void LateUpdate(){
+		if (diverRigidbody.position.y < -1) {
+			ResetRound ();
+			jumperRigidbody.position = jumperPos;
+			controllingJumper = true;
+			controllingDiver = false;
+			waiting = true;
+			playing = false;
+			cam.GetComponent<CameraController> ().target = jumper.transform;
 		}
 	}
 
 	public void Setup()
 	{
-		if (diver != null) {
+		if (diver != null) 
+		{
 			Destroy (diver);
 		}
 
-		if(jumper != null){
+		if(jumper != null)
+		{
 			Destroy(jumper);
 		}
 
-		if (platform != null) {
+		if (platform != null) 
+		{
 			Destroy (platform);
 		}
+
+		enableWind = false;
 
 		//Set up diver
 		diverPos = transform.FindChild ("DiverPos").transform;
@@ -113,6 +140,8 @@ public class GameController : MonoBehaviour
 		diver = (GameObject)Instantiate(diverGameObject,diverPos.position,diverPos.rotation);
 		diverRigidbody = diver.GetComponent<Rigidbody> ();
 		diverProps = diver.GetComponent<Diver> ();
+		//diverRigidbody = diver.transform.GetComponentInChildren<Rigidbody> ();
+		//diverProps = diver.transform.GetComponentInChildren<Diver> ();
 		normalHorizontalSpeed = diverJumpForce.x / 50;
 		trickHorizontalSpeed = normalHorizontalSpeed / 2;
 		diverRigidbody.maxAngularVelocity = 100;
@@ -132,6 +161,8 @@ public class GameController : MonoBehaviour
 		jumperProps = jumper.GetComponent<Jumper> ();
 
 		controllingJumper = true;
+		cam.GetComponent<CameraController> ().target = jumper.transform;
+		//cam.gameObject.GetComponent<GenericMoveCamera> ().LookAtTarget = diver;
 	}
 
 	void SetDiverSpinSpeed(float normalSpin, float trickSpin)
@@ -146,17 +177,19 @@ public class GameController : MonoBehaviour
 			//rb.angularVelocity.Set (new Vector3(0f,0f,-15f));
 			diverRigidbody.angularVelocity = new Vector3 (0f, 0f, -trickSpin);
 			diverRigidbody.velocity = new Vector3 (trickHorizontalSpeed, verticalVelocity, currentVelocity.z);
+			diverRigidbody.AddForce(new Vector3(0,-jumpHeightCompensate,0));
 		};
+
 	}
 
 	void ResetRound()
 	{
 		Debug.Log ("Flips: "+Mathf.Round (flips));
 		//Debug.Log ("Flips: "+(flips%0.5f));
-		diverProps.onGround = true;
 		jumpEnd = Time.time;
 		flips = 0;
 		WindupRotation = 0;
+		enableWind = false;
 
 		//Debug.Log (diverRigidbody.position.x);
 		Debug.Log ("Time: "+(jumpEnd - jumpStart));
@@ -172,6 +205,7 @@ public class GameController : MonoBehaviour
 		Vector3 jump = new Vector3 (jumpForce.x + jumperProps.weight/compensateWeightHorizontal,jumpForce.y * jumperProps.weight/compensateWeightVertical + compensatePlatformHeight *platformProps.height, jumpForce.z);
 		diverRigidbody.AddForce (jump);
 		jumpStart = Time.time;
+		cam.GetComponent<CameraController> ().target = diver.transform;
 		//Debug.Log (diverRigidbody.velocity.x + " " + diverRigidbody.velocity.y);
 	}
 
@@ -188,19 +222,33 @@ public class GameController : MonoBehaviour
 		flips = WindupRotation / 360;
 	}
 
-	void OnTriggerEnter(Collider other){
-		if(other.tag == "Jumper"){
+	void OnTriggerEnter(Collider other)
+	{
+		if(other.tag == "Jumper")
+		{
 			controllingDiver = true;
 			DiverJump (diverJumpForce);
+			enableWind = true;
 		};
 
-		if(other.tag == "Diver"){
+		if(other.tag == "Diver")
+		{
 			diverProps.onGround = true;
 		};
 	}
 
-	void OnTriggerExit(Collider other){
-		if(other.tag == "Diver"){
+	void OnTriggerStay(Collider other)
+	{
+		if(other.tag == "Diver")
+		{
+			diverProps.onGround = true;
+		};
+	}
+
+	void OnTriggerExit(Collider other)
+	{
+		if(other.tag == "Diver")
+		{
 			diverProps.onGround = false;
 		};
 	}

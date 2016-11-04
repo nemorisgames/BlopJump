@@ -5,29 +5,37 @@ using System.Linq;
 
 public class RewardMachine : MonoBehaviour {
 
-	Dictionary<int,Unlockable> availableRewards;
+	[HideInInspector]
+	public Dictionary<int,Unlockable> availableRewards;
 	public MainController controller;
+	public GameObject rewardScreen;
 
 	public int [] tierCost = {250,300,500};
 	public int currentTier = 0;
 
 	public int remainingRewards;
 
+	public bool rewardScreenVisible = false;
+
+	UILabel infoLabel;
+	UILabel rewardBoxLabel;
+	UILabel rewardButtonLabel;
+
 	// Use this for initialization
-	void Start () 
+	void Start ()
 	{
-		availableRewards = new Dictionary<int,Unlockable> ();
+		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController> ();
+		//availableRewards = new Dictionary<int,Unlockable> ();
+		rewardScreen.SetActive (false);
+		infoLabel = rewardScreen.transform.FindChild ("Info").GetComponent<UILabel> ();
+		rewardBoxLabel = rewardScreen.transform.FindChild ("RewardItem").transform.FindChild ("Label").GetComponent<UILabel> ();
+		rewardButtonLabel = rewardScreen.transform.FindChild ("RewardButton").transform.FindChild ("Label").GetComponent<UILabel> ();
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
 		remainingRewards = availableRewards.Count;
-
-		if (Input.GetKeyDown (KeyCode.R) && controller.testing) 
-		{
-			GetReward ();
-		};
 
 		if (Input.GetKeyDown (KeyCode.T) && controller.testing) 
 		{
@@ -46,13 +54,20 @@ public class RewardMachine : MonoBehaviour {
 				UnlockItem (u, key);
 			};
 			controller.coins -= tierCost [currentTier];
+			rewardBoxLabel.text = u.name;
+			infoLabel.text = "Item unlocked!";
+			rewardButtonLabel.text = "Get Reward (" + tierCost [currentTier]+" coins)";
+
+			UpdateCoins ();
 		}
 		else if (controller.coins < tierCost [currentTier]) 
 		{
+			infoLabel.text = "Not enough coins!";
 			Debug.Log ("Not enough coins!");
 		}
 		else
 		{
+			infoLabel.text = "All items are unlocked!";
 			Debug.Log ("All items are unlocked!");
 		}
 	}
@@ -74,7 +89,9 @@ public class RewardMachine : MonoBehaviour {
 	{
 		foreach (KeyValuePair<int,Unlockable> kp in controller.unlockables) 
 		{
-			availableRewards.Add (kp.Key,kp.Value);	
+			if (kp.Value.unlocked == false) {
+				availableRewards.Add (kp.Key, kp.Value);
+			}
 		};
 	}
 
@@ -93,5 +110,29 @@ public class RewardMachine : MonoBehaviour {
 		PlayerPrefs.SetInt (u.name, 1);
 		availableRewards.Remove (k);
 		Debug.Log ("Unlocked " + u.name);
+	}
+
+	public void ToggleRewardScreen()
+	{
+		if (rewardScreenVisible) 
+		{
+			controller.gameController.waiting = true;
+			rewardScreen.SetActive (false);
+			rewardScreenVisible = false;
+		} 
+		else 
+		{
+			UpdateCoins ();
+			infoLabel.text = "";
+			rewardBoxLabel.text = "???";
+			rewardButtonLabel.text = "Get Reward (" + tierCost [currentTier]+" coins)";
+			controller.gameController.waiting = false;
+			rewardScreen.SetActive (true);
+			rewardScreenVisible = true;
+		};
+	}
+
+	void UpdateCoins(){
+		rewardScreen.transform.FindChild ("Coins").GetComponent<UILabel> ().text = "Your coins: " + controller.coins;
 	}
 }
