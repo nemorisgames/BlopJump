@@ -74,6 +74,12 @@ public class MainController : MonoBehaviour
 			{
 				rewardMachine.ToggleRewardScreen ();
 			};
+
+			if (Input.GetKeyDown (KeyCode.U)) 
+			{
+				UnlockAll ();
+				Debug.Log ("cheater!");
+			};
 		}
 	}
 
@@ -240,6 +246,13 @@ public class MainController : MonoBehaviour
 		{
 			rewardMachine.ToggleRewardScreen ();
 		};
+	}
+
+	void UnlockAll(){ //for testing purposes only
+		foreach(KeyValuePair<int,Unlockable> u in unlockables){
+			u.Value.unlocked = true;
+		};
+		rewardMachine.availableRewards.Clear ();
 	}
 
 }
