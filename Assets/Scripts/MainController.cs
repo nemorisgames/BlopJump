@@ -35,8 +35,12 @@ public class MainController : MonoBehaviour
 	int jumperKeyAux;
 	int platformKeyAux;
 
-	bool selectScreenVisible = false;
+	[HideInInspector]
+	public bool selectScreenVisible = false;
 	UILabel coinsLabel;
+	UILabel plusCoinLabel;
+	GameObject plusCoin;
+	TweenAlpha plusCoinTween;
 
 	// Use this for initialization
 	void Awake () 
@@ -50,8 +54,16 @@ public class MainController : MonoBehaviour
 		rewardMachine.LoadTier ();
 		Debug.Log ("Presiona 'L' para ver lista de items y estado, 'R' para desbloquear un item");
 		coinsLabel = GameObject.Find ("Coins").GetComponent<UILabel> ();
+		plusCoin = GameObject.Find ("PlusCoin");
+		plusCoinLabel = plusCoin.GetComponent<UILabel> ();
+		plusCoinTween = plusCoin.GetComponent<TweenAlpha> ();
 		selectScreen.SetActive (false);
 		LoadDefaults ();
+	}
+
+	void Start(){
+		plusCoinTween.ResetToBeginning ();
+		plusCoinTween.value = 0;
 	}
 
 	// Update is called once per frame
@@ -75,7 +87,7 @@ public class MainController : MonoBehaviour
 				rewardMachine.ToggleRewardScreen ();
 			};
 
-			if (Input.GetKeyDown (KeyCode.U)) 
+			if (Input.GetKeyDown (KeyCode.U) && !selectScreenVisible && !rewardMachine.rewardScreenVisible) 
 			{
 				UnlockAll ();
 				Debug.Log ("cheater!");
@@ -114,85 +126,83 @@ public class MainController : MonoBehaviour
 		};
 	}
 
-	void ToggleSelectScreen(){
-		if (selectScreenVisible) {
-			for (int i = 0; i < 3; i++) {
-				foreach (Transform t in scrollViews[i].transform) 
-				{
-					GameObject.Destroy (t.gameObject);
-				};
-				containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
-			};
-			gameController.waiting = true;
-			selectScreen.SetActive (false);
-			selectScreenVisible = false;
-		}
-
-		else
-		{
-			float diverAux = -210;
-			float jumperAux = -210;
-			float platformAux = -210;
-			diverKeyAux = diverKey;
-			jumperKeyAux = jumperKey;
-			platformKeyAux = platformKey;
-			foreach(KeyValuePair<int,Unlockable> u in unlockables)
-			{
-				if (u.Value.unlocked) 
-				{
-					if (u.Value.GetComponent<Diver> () != null) 
-					{
-						GameObject box = (GameObject)Instantiate (selectScreenBox, containers[0].transform.position, Quaternion.identity, scrollViews [0].transform);
-						box.name = u.Key.ToString ();
-						box.tag = "Diver";
-						box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Diver> ().name;
-						box.transform.localPosition = new Vector3 (diverAux, box.transform.position.y, box.transform.position.z);
-						box.GetComponent<UIToggle> ().group = 1;
-						diverAux += boxDistance;
-						if (u.Key == diverKey) {
-							box.GetComponent<UIToggle> ().Set (true);
-						}
-
+	public void ToggleSelectScreen(){
+		if (!gameController.playing || gameController.controllingJumper) {
+			if (rewardMachine.rewardScreenVisible) {
+				rewardMachine.ToggleRewardScreen ();
+			}
+			if (gameController.endRoundScreenVisible) {
+				gameController.ToggleEndRoundScreen ();
+				gameController.ResetPosition ();
+			}
+			if (selectScreenVisible) {
+				for (int i = 0; i < 3; i++) {
+					foreach (Transform t in scrollViews[i].transform) {
+						GameObject.Destroy (t.gameObject);
 					}
-					if (u.Value.GetComponent<Jumper> () != null) 
-					{
-						GameObject box = (GameObject)Instantiate (selectScreenBox, containers[1].transform.position, Quaternion.identity, scrollViews [1].transform);
-						box.name = u.Key.ToString ();
-						box.tag = "Jumper";
-						box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Jumper> ().name;
-						box.transform.localPosition = new Vector3 (jumperAux, box.transform.position.y, box.transform.position.z);
-						box.GetComponent<UIToggle> ().group = 2;
-						jumperAux += boxDistance;
-						if (u.Key == jumperKey) {
-							box.GetComponent<UIToggle> ().Set (true);
+					containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
+				}
+				gameController.waiting = true;
+				selectScreen.SetActive (false);
+				selectScreenVisible = false;
+			} else {
+				float diverAux = -210;
+				float jumperAux = -210;
+				float platformAux = -210;
+				diverKeyAux = diverKey;
+				jumperKeyAux = jumperKey;
+				platformKeyAux = platformKey;
+				foreach (KeyValuePair<int,Unlockable> u in unlockables) {
+					if (u.Value.unlocked) {
+						if (u.Value.GetComponent<Diver> () != null) {
+							GameObject box = (GameObject)Instantiate (selectScreenBox, containers [0].transform.position, Quaternion.identity, scrollViews [0].transform);
+							box.name = u.Key.ToString ();
+							box.tag = "Diver";
+							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Diver> ().name;
+							box.transform.localPosition = new Vector3 (diverAux, box.transform.position.y, box.transform.position.z);
+							box.GetComponent<UIToggle> ().group = 1;
+							diverAux += boxDistance;
+							if (u.Key == diverKey) {
+								box.GetComponent<UIToggle> ().Set (true);
+							}
+
 						}
-					}
-					if (u.Value.GetComponent<Platform> () != null) 
-					{
-						GameObject box = (GameObject)Instantiate (selectScreenBox, containers[2].transform.position, Quaternion.identity, scrollViews [2].transform);
-						box.name = u.Key.ToString ();
-						box.tag = "Platform";
-						box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Platform> ().name;
-						box.transform.localPosition = new Vector3 (platformAux, box.transform.position.y, box.transform.position.z);
-						box.GetComponent<UIToggle> ().group = 3;
-						platformAux += boxDistance;
-						if (u.Key == platformKey) {
-							box.GetComponent<UIToggle> ().Set (true);
+						if (u.Value.GetComponent<Jumper> () != null) {
+							GameObject box = (GameObject)Instantiate (selectScreenBox, containers [1].transform.position, Quaternion.identity, scrollViews [1].transform);
+							box.name = u.Key.ToString ();
+							box.tag = "Jumper";
+							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Jumper> ().name;
+							box.transform.localPosition = new Vector3 (jumperAux, box.transform.position.y, box.transform.position.z);
+							box.GetComponent<UIToggle> ().group = 2;
+							jumperAux += boxDistance;
+							if (u.Key == jumperKey) {
+								box.GetComponent<UIToggle> ().Set (true);
+							}
+						}
+						if (u.Value.GetComponent<Platform> () != null) {
+							GameObject box = (GameObject)Instantiate (selectScreenBox, containers [2].transform.position, Quaternion.identity, scrollViews [2].transform);
+							box.name = u.Key.ToString ();
+							box.tag = "Platform";
+							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Platform> ().name;
+							box.transform.localPosition = new Vector3 (platformAux, box.transform.position.y, box.transform.position.z);
+							box.GetComponent<UIToggle> ().group = 3;
+							platformAux += boxDistance;
+							if (u.Key == platformKey) {
+								box.GetComponent<UIToggle> ().Set (true);
+							}
 						}
 					}
 				}
-			};
 
-			for (int i = 0; i < 3; i++) 
-			{
-				containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
+				for (int i = 0; i < 3; i++) {
+					containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
+				}
 
-			};
-
-			gameController.waiting = false;
-			selectScreen.SetActive (true);
-			selectScreenVisible = true;
-		};
+				gameController.waiting = false;
+				selectScreen.SetActive (true);
+				selectScreenVisible = true;
+			}
+		}
 	}
 
 	public void SelectItems()
@@ -235,17 +245,22 @@ public class MainController : MonoBehaviour
 
 	public void CloseWindow()
 	{
-		if (selectScreenVisible) 
-		{
+		if (selectScreenVisible) {
 			ToggleSelectScreen ();
-			diverKey = diverKeyAux;
-			jumperKey = jumperKeyAux;
-			platformKey = platformKeyAux;
-		}
-		else if (rewardMachine.rewardScreenVisible) 
-		{
+			LastLoadout ();
+		} else if (rewardMachine.rewardScreenVisible) {
 			rewardMachine.ToggleRewardScreen ();
-		};
+		} else if (gameController.endRoundScreenVisible) {
+			gameController.ToggleEndRoundScreen ();
+			gameController.ResetRound ();
+		} 
+	}
+
+	public IEnumerator PlusCoin(int value){
+		plusCoinLabel.text = "+" + value;
+		plusCoinTween.Toggle ();
+		yield return new WaitForSeconds (1.2f);
+		plusCoinTween.Toggle ();
 	}
 
 	void UnlockAll(){ //for testing purposes only
@@ -255,4 +270,9 @@ public class MainController : MonoBehaviour
 		rewardMachine.availableRewards.Clear ();
 	}
 
+	public void LastLoadout(){
+		diverKey = diverKeyAux;
+		jumperKey = jumperKeyAux;
+		platformKey = platformKeyAux;
+	}
 }

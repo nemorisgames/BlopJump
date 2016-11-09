@@ -7,6 +7,10 @@ public class GameController : MonoBehaviour
 
 	Transform diverPos;
 	Camera cam;
+	MainController controller;
+	GameObject endRoundScreen;
+	[HideInInspector]
+	public bool endRoundScreenVisible;
 
 	public bool testing;
 	[HideInInspector]
@@ -16,6 +20,11 @@ public class GameController : MonoBehaviour
 
 	public float windForce;
 	public float jumpHeightCompensate;
+	public int coinsPerFlip;
+	public int numCoins;
+	public float coinSpacing;
+	GameObject coinArea;
+	GameObject coin;
 
 	[Header("Diver")]
 	public GameObject diverGameObject; //diver en uso
@@ -28,6 +37,7 @@ public class GameController : MonoBehaviour
 	Diver diverProps; //propiedades del diver
 	GameObject diver;
 	bool controllingDiver;
+
 
 	//temp
 	float jumpStart;
@@ -46,7 +56,7 @@ public class GameController : MonoBehaviour
 
 
 	GameObject jumper;
-	bool controllingJumper;
+	public bool controllingJumper;
 	Rigidbody jumperRigidbody;
 	Jumper jumperProps;
 	Vector3 jumperPos;
@@ -58,19 +68,31 @@ public class GameController : MonoBehaviour
 	GameObject platform;
 	Platform platformProps;
 	bool enableWind;
+	UILabel endRoundFlips;
+	UILabel endRoundCoins;
 
 	// Use this for initialization
 	void Awake () 
 	{
 		cam = Camera.main;
+		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController> ();
+		endRoundScreen = GameObject.Find ("EndRoundScreen");
+		endRoundScreen.SetActive (false);
+		endRoundScreenVisible = false;
+		endRoundFlips = endRoundScreen.transform.FindChild ("EndFlips").GetComponent<UILabel> ();
+		endRoundCoins = endRoundScreen.transform.FindChild ("EndCoins").GetComponent<UILabel> ();
+		coinArea = GameObject.Find ("CoinArea");
+		coin = GameObject.Find ("Coin");
 		Setup ();
 	}
 
-	void FixedUpdate(){
+	void FixedUpdate()
+	{
 		if (waiting) {
 			//when controlling Jumper
+			diver.GetComponent<Animator> ().SetBool ("Diving", false);
 			if (controllingJumper && !controllingDiver) {
-				if (Input.GetKeyDown (KeyCode.Space)) {
+				if (Input.GetKeyDown (KeyCode.Space)) { //
 					jumperRigidbody.AddForce (jumperJumpForce);
 					controllingJumper = false;
 					waiting = false;
@@ -91,6 +113,7 @@ public class GameController : MonoBehaviour
 				}
 
 				if (!diverProps.onGround) {
+					diver.GetComponent<Animator> ().SetBool ("Diving", true);
 					SetDiverSpinSpeed (diverProps.spinSpeed, diverProps.trickSpinSpeed);
 				}
 
@@ -103,15 +126,12 @@ public class GameController : MonoBehaviour
 		}
 	}
 
-	void LateUpdate(){
+	void LateUpdate()
+	{
 		if (diverRigidbody.position.y < -1) {
-			ResetRound ();
-			jumperRigidbody.position = jumperPos;
-			controllingJumper = true;
-			controllingDiver = false;
-			waiting = true;
-			playing = false;
-			cam.GetComponent<CameraController> ().target = jumper.transform;
+			Debug.Log ("nope");
+			ToggleEndRoundScreen ();
+			//ResetRound ();
 		}
 	}
 
@@ -139,6 +159,7 @@ public class GameController : MonoBehaviour
 
 		diver = (GameObject)Instantiate(diverGameObject,diverPos.position,diverPos.rotation);
 		diverRigidbody = diver.GetComponent<Rigidbody> ();
+		//diverRigidbody = diver.GetComponentInChildren<Rigidbody> ();
 		diverProps = diver.GetComponent<Diver> ();
 		//diverRigidbody = diver.transform.GetComponentInChildren<Rigidbody> ();
 		//diverProps = diver.transform.GetComponentInChildren<Diver> ();
@@ -162,7 +183,12 @@ public class GameController : MonoBehaviour
 
 		controllingJumper = true;
 		cam.GetComponent<CameraController> ().target = jumper.transform;
+		cam.GetComponent<CameraController> ().UpdateCamera (platformProps);
+		jumperJumpForce = new Vector3 (platformProps.jumpForceX, jumperJumpForce.y, jumperJumpForce.z);
 		//cam.gameObject.GetComponent<GenericMoveCamera> ().LookAtTarget = diver;
+
+		GenerateCoins (numCoins);
+		ResetRound ();
 	}
 
 	void SetDiverSpinSpeed(float normalSpin, float trickSpin)
@@ -172,19 +198,23 @@ public class GameController : MonoBehaviour
 		float verticalVelocity = currentVelocity.y - verticalSpeed;
 		diverRigidbody.angularVelocity = new Vector3 (0f, 0f, -normalSpin);
 		diverRigidbody.velocity = new Vector3 (normalHorizontalSpeed, currentVelocity.y, currentVelocity.z);
-		if (Input.GetKey (KeyCode.Space)) 
+		if (Input.GetKey (KeyCode.Space))
 		{
 			//rb.angularVelocity.Set (new Vector3(0f,0f,-15f));
+			diver.GetComponent<Animator>().SetBool("Spinning",true);
 			diverRigidbody.angularVelocity = new Vector3 (0f, 0f, -trickSpin);
 			diverRigidbody.velocity = new Vector3 (trickHorizontalSpeed, verticalVelocity, currentVelocity.z);
 			diverRigidbody.AddForce(new Vector3(0,-jumpHeightCompensate,0));
-		};
+		}
+		else
+			diver.GetComponent<Animator>().SetBool("Spinning",false);
 
 	}
 
-	void ResetRound()
-	{
+	public void ResetPosition(){
+		AddFlipCoins (Mathf.FloorToInt (flips));
 		Debug.Log ("Flips: "+Mathf.Round (flips));
+
 		//Debug.Log ("Flips: "+(flips%0.5f));
 		jumpEnd = Time.time;
 		flips = 0;
@@ -198,21 +228,40 @@ public class GameController : MonoBehaviour
 		diverRigidbody.angularVelocity = Vector3.zero;
 		diverRigidbody.rotation = diverPos.rotation;
 		diverRigidbody.position = diverPos.position;
+		jumperRigidbody.position = jumperPos;
+		controllingJumper = true;
+		controllingDiver = false;
+		cam.GetComponent<CameraController>().follow = false;
+	}
+
+	public void ResetRound()
+	{
+		waiting = true;
+		playing = false;
+		cam.GetComponent<CameraController> ().target = jumper.transform;
+		cam.GetComponent<CameraController>().follow = true;
+		if (endRoundScreenVisible) {
+			ToggleEndRoundScreen ();
+		}
+		CoinCleanup ();
+		GenerateCoins (numCoins);
 	}
 
 	void DiverJump(Vector3 jumpForce)
 	{
-		Vector3 jump = new Vector3 (jumpForce.x + jumperProps.weight/compensateWeightHorizontal,jumpForce.y * jumperProps.weight/compensateWeightVertical + compensatePlatformHeight *platformProps.height, jumpForce.z);
+		Vector3 jump = new Vector3 (jumpForce.x + jumperProps.weight/compensateWeightHorizontal + compensatePlatformHeight*platformProps.height, jumpForce.y * jumperProps.weight/compensateWeightVertical + compensatePlatformHeight *platformProps.height, jumpForce.z);
 		diverRigidbody.AddForce (jump);
+		diver.GetComponent<Animator> ().SetTrigger ("Jump");
 		jumpStart = Time.time;
 		cam.GetComponent<CameraController> ().target = diver.transform;
+		//cam.GetComponent<CameraController>().ChangeTargetV2(diver.transform);
 		//Debug.Log (diverRigidbody.velocity.x + " " + diverRigidbody.velocity.y);
 	}
 
 	void CalculateFlips()
 	{
-		deltaRotation = (currentRotation - diverProps.transform.eulerAngles.z);
-		currentRotation = diverProps.transform.eulerAngles.z;
+		deltaRotation = (currentRotation - diver.transform.eulerAngles.z);
+		currentRotation = diver.transform.eulerAngles.z;
 		if (deltaRotation >= 300) 
 			deltaRotation -= 360;
 		if (deltaRotation <= -300) 
@@ -251,5 +300,58 @@ public class GameController : MonoBehaviour
 		{
 			diverProps.onGround = false;
 		};
+	}
+
+	void AddFlipCoins(int flips){
+		endRoundFlips.text = "Flips: "+flips;
+		int coins = flips * coinsPerFlip;
+		controller.coins += coins;
+		endRoundCoins.text = "Coins: "+coins;
+		Debug.Log ("+" + coins + " coins!");
+	}
+
+	public void ToggleEndRoundScreen(){
+		if (endRoundScreenVisible) 
+		{
+			endRoundScreenVisible = false;
+			endRoundScreen.SetActive (false);
+		} 
+		else 
+		{
+			endRoundScreenVisible = true;
+			endRoundScreen.SetActive (true);
+			ResetPosition ();
+		}
+	}
+
+	void GenerateCoins(int c){
+		BoxCollider area = coinArea.GetComponentInChildren<BoxCollider> ();
+		float size = area.bounds.extents.x;
+		//Vector3 center = area.center;
+		Vector3 pos = area.transform.position;
+		float lastX = 0;
+		//Debug.Log (center + " " + pos);
+		for (int i = 0; i < c; i++) {
+			float randX = Random.Range (pos.x - size, pos.x + size);
+			Debug.Log (randX);
+			float randY = Random.Range (pos.y, pos.y + size);
+			if (i != 0) {
+				while (Mathf.Abs (randX - lastX) < coinSpacing) {
+					Debug.Log (randX + "-" + lastX + "=" + Mathf.Abs (randX - lastX));
+					randX = Random.Range (pos.x - size, pos.x + size);
+					Debug.Log ("new " + randX);
+				}
+			}
+			lastX = randX;
+			GameObject newCoin = (GameObject)Instantiate (coin, new Vector3 (randX, randY, pos.z), coin.transform.rotation);
+			newCoin.tag = "Coin";
+		}
+	}
+
+	void CoinCleanup(){
+		GameObject[] coinsInScene = GameObject.FindGameObjectsWithTag ("Coin");
+		for (int i = 0; i < coinsInScene.Length; i++) {
+			Destroy (coinsInScene [i]);
+		}
 	}
 }

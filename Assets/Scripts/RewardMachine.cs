@@ -21,10 +21,13 @@ public class RewardMachine : MonoBehaviour {
 	UILabel rewardBoxLabel;
 	UILabel rewardButtonLabel;
 
+	GameController gameController;
+
 	// Use this for initialization
 	void Start ()
 	{
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController> ();
+		gameController = GameObject.FindGameObjectWithTag ("Blop").GetComponent<GameController> ();
 		//availableRewards = new Dictionary<int,Unlockable> ();
 		rewardScreen.SetActive (false);
 		infoLabel = rewardScreen.transform.FindChild ("Info").GetComponent<UILabel> ();
@@ -114,25 +117,34 @@ public class RewardMachine : MonoBehaviour {
 
 	public void ToggleRewardScreen()
 	{
-		if (rewardScreenVisible) 
-		{
-			controller.gameController.waiting = true;
-			rewardScreen.SetActive (false);
-			rewardScreenVisible = false;
-		} 
-		else 
-		{
-			UpdateCoins ();
-			infoLabel.text = "";
-			rewardBoxLabel.text = "???";
-			rewardButtonLabel.text = "Get Reward (" + tierCost [currentTier]+" coins)";
-			controller.gameController.waiting = false;
-			rewardScreen.SetActive (true);
-			rewardScreenVisible = true;
-		};
+		if (!gameController.playing || gameController.controllingJumper) {
+			if (controller.selectScreenVisible) {
+				controller.ToggleSelectScreen ();
+				controller.LastLoadout ();
+			}
+			if (gameController.endRoundScreenVisible) {
+				gameController.ToggleEndRoundScreen ();
+				gameController.ResetPosition ();
+			}
+			if (rewardScreenVisible) {
+				controller.gameController.waiting = true;
+				rewardScreen.SetActive (false);
+				rewardScreenVisible = false;
+				gameController.ResetRound ();
+			} else {
+				UpdateCoins ();
+				infoLabel.text = "";
+				rewardBoxLabel.text = "???";
+				rewardButtonLabel.text = "Get Reward (" + tierCost [currentTier] + " coins)";
+				controller.gameController.waiting = false;
+				rewardScreen.SetActive (true);
+				rewardScreenVisible = true;
+			}
+		}
 	}
 
-	void UpdateCoins(){
+	void UpdateCoins()
+	{
 		rewardScreen.transform.FindChild ("Coins").GetComponent<UILabel> ().text = "Your coins: " + controller.coins;
 	}
 }
