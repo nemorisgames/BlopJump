@@ -37,7 +37,7 @@ public class GameController : MonoBehaviour
 	Diver diverProps; //propiedades del diver
 	GameObject diver;
 	bool controllingDiver;
-
+	bool goodJump;
 
 	//temp
 	float jumpStart;
@@ -70,6 +70,9 @@ public class GameController : MonoBehaviour
 	bool enableWind;
 	UILabel endRoundFlips;
 	UILabel endRoundCoins;
+	UILabel endRoundJump;
+	LandingSpot landingSpot;
+	//CapsuleCollider diverCollider;
 
 	// Use this for initialization
 	void Awake () 
@@ -81,8 +84,10 @@ public class GameController : MonoBehaviour
 		endRoundScreenVisible = false;
 		endRoundFlips = endRoundScreen.transform.FindChild ("EndFlips").GetComponent<UILabel> ();
 		endRoundCoins = endRoundScreen.transform.FindChild ("EndCoins").GetComponent<UILabel> ();
+		endRoundJump = endRoundScreen.transform.FindChild ("EndRoundText").GetComponent<UILabel> ();
 		coinArea = GameObject.Find ("CoinArea");
 		coin = GameObject.Find ("Coin");
+		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
 		Setup ();
 	}
 
@@ -93,6 +98,7 @@ public class GameController : MonoBehaviour
 			diver.GetComponent<Animator> ().SetBool ("Diving", false);
 			if (controllingJumper && !controllingDiver) {
 				if (Input.GetKeyDown (KeyCode.Space)) { //
+					//diver.GetComponent<Animator> ().SetTrigger ("Jump");
 					jumperRigidbody.AddForce (jumperJumpForce);
 					controllingJumper = false;
 					waiting = false;
@@ -114,6 +120,7 @@ public class GameController : MonoBehaviour
 
 				if (!diverProps.onGround) {
 					diver.GetComponent<Animator> ().SetBool ("Diving", true);
+					//diverCollider.radius = 0.55f;
 					SetDiverSpinSpeed (diverProps.spinSpeed, diverProps.trickSpinSpeed);
 				}
 
@@ -129,10 +136,13 @@ public class GameController : MonoBehaviour
 	void LateUpdate()
 	{
 		if (diverRigidbody.position.y < -1) {
-			Debug.Log ("nope");
+			if (landingSpot.getLanding ())
+				goodJump = false;
 			ToggleEndRoundScreen ();
 			//ResetRound ();
 		}
+
+
 	}
 
 	public void Setup()
@@ -159,15 +169,11 @@ public class GameController : MonoBehaviour
 
 		diver = (GameObject)Instantiate(diverGameObject,diverPos.position,diverPos.rotation);
 		diverRigidbody = diver.GetComponent<Rigidbody> ();
-		//diverRigidbody = diver.GetComponentInChildren<Rigidbody> ();
 		diverProps = diver.GetComponent<Diver> ();
-		//diverRigidbody = diver.transform.GetComponentInChildren<Rigidbody> ();
-		//diverProps = diver.transform.GetComponentInChildren<Diver> ();
 		normalHorizontalSpeed = diverJumpForce.x / 50;
 		trickHorizontalSpeed = normalHorizontalSpeed / 2;
 		diverRigidbody.maxAngularVelocity = 100;
 		verticalSpeed = diverProps.trickSpinSpeed / 120;
-
 
 		controllingDiver = false;
 
@@ -198,20 +204,23 @@ public class GameController : MonoBehaviour
 		float verticalVelocity = currentVelocity.y - verticalSpeed;
 		diverRigidbody.angularVelocity = new Vector3 (0f, 0f, -normalSpin);
 		diverRigidbody.velocity = new Vector3 (normalHorizontalSpeed, currentVelocity.y, currentVelocity.z);
-		if (Input.GetKey (KeyCode.Space))
-		{
+		if (Input.GetKey (KeyCode.Space)) {
 			//rb.angularVelocity.Set (new Vector3(0f,0f,-15f));
-			diver.GetComponent<Animator>().SetBool("Spinning",true);
+			diver.GetComponent<Animator> ().SetBool ("Spinning", true);
 			diverRigidbody.angularVelocity = new Vector3 (0f, 0f, -trickSpin);
 			diverRigidbody.velocity = new Vector3 (trickHorizontalSpeed, verticalVelocity, currentVelocity.z);
-			diverRigidbody.AddForce(new Vector3(0,-jumpHeightCompensate,0));
+			diverRigidbody.AddForce (new Vector3 (0, -jumpHeightCompensate, 0));
+			//diverCollider.radius = 0.85f;
+		} else {
+			diver.GetComponent<Animator> ().SetBool ("Spinning", false);
 		}
-		else
-			diver.GetComponent<Animator>().SetBool("Spinning",false);
 
 	}
 
 	public void ResetPosition(){
+		diver.GetComponent<Animator> ().SetBool ("Spinning", false);
+		diver.GetComponent<Animator> ().SetBool ("Diving", false);
+		//diverCollider.radius = 0.55f;
 		AddFlipCoins (Mathf.FloorToInt (flips));
 		Debug.Log ("Flips: "+Mathf.Round (flips));
 
@@ -245,13 +254,13 @@ public class GameController : MonoBehaviour
 		}
 		CoinCleanup ();
 		GenerateCoins (numCoins);
+		landingSpot.enableLanding (true);
 	}
 
 	void DiverJump(Vector3 jumpForce)
 	{
 		Vector3 jump = new Vector3 (jumpForce.x + jumperProps.weight/compensateWeightHorizontal + compensatePlatformHeight*platformProps.height, jumpForce.y * jumperProps.weight/compensateWeightVertical + compensatePlatformHeight *platformProps.height, jumpForce.z);
 		diverRigidbody.AddForce (jump);
-		diver.GetComponent<Animator> ().SetTrigger ("Jump");
 		jumpStart = Time.time;
 		cam.GetComponent<CameraController> ().target = diver.transform;
 		//cam.GetComponent<CameraController>().ChangeTargetV2(diver.transform);
@@ -303,11 +312,18 @@ public class GameController : MonoBehaviour
 	}
 
 	void AddFlipCoins(int flips){
-		endRoundFlips.text = "Flips: "+flips;
+		endRoundFlips.text = "Flips: " + flips;
 		int coins = flips * coinsPerFlip;
-		controller.coins += coins;
-		endRoundCoins.text = "Coins: "+coins;
-		Debug.Log ("+" + coins + " coins!");
+		if (goodJump) {
+			controller.coins += coins;
+			endRoundCoins.text = "Coins: " + coins;
+			Debug.Log ("+" + coins + " coins!");
+			endRoundJump.text = "Good Jump!";
+		} else {
+			endRoundCoins.text = "Coins: 0";
+			endRoundJump.text = "Bad Jump!";
+		}
+
 	}
 
 	public void ToggleEndRoundScreen(){
@@ -333,13 +349,10 @@ public class GameController : MonoBehaviour
 		//Debug.Log (center + " " + pos);
 		for (int i = 0; i < c; i++) {
 			float randX = Random.Range (pos.x - size, pos.x + size);
-			Debug.Log (randX);
 			float randY = Random.Range (pos.y, pos.y + size);
 			if (i != 0) {
 				while (Mathf.Abs (randX - lastX) < coinSpacing) {
-					Debug.Log (randX + "-" + lastX + "=" + Mathf.Abs (randX - lastX));
 					randX = Random.Range (pos.x - size, pos.x + size);
-					Debug.Log ("new " + randX);
 				}
 			}
 			lastX = randX;
@@ -353,5 +366,13 @@ public class GameController : MonoBehaviour
 		for (int i = 0; i < coinsInScene.Length; i++) {
 			Destroy (coinsInScene [i]);
 		}
+	}
+		
+	public void GoodJump(bool b){
+		goodJump = b;
+	}
+
+	public GameObject ReturnDiver(){
+		return diver;
 	}
 }
