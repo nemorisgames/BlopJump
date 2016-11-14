@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour {
 	public float depthOffset;
 	MainController controller;
 	GameController gameController;
-	float initialDepth;
+	public float initialDepth;
 	[HideInInspector]
 	public bool follow;
 	float dampTime = 0.15f;
@@ -22,8 +22,7 @@ public class CameraController : MonoBehaviour {
 	void Awake(){
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController> ();
 		gameController = GameObject.FindGameObjectWithTag ("Blop").GetComponent<GameController> ();
-		jumperOffset = new Vector3 (1.6f, 2.5f, 0f);
-		initialDepth = -8;
+		jumperOffset = new Vector3 (-1.6f, 2.5f, 0f);
 		follow = true;
 		cam = Camera.main;
 	}
