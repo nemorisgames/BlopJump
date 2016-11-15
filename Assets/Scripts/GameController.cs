@@ -202,12 +202,12 @@ public class GameController : MonoBehaviour
 		CalculateFlips ();
 		Vector3 currentVelocity = diverRigidbody.velocity;
 		float verticalVelocity = currentVelocity.y - verticalSpeed;
-		diverRigidbody.angularVelocity = new Vector3 (0f, 0f, -normalSpin);
+		diverRigidbody.angularVelocity = new Vector3 (0f, 0f, normalSpin);
 		diverRigidbody.velocity = new Vector3 (normalHorizontalSpeed, currentVelocity.y, currentVelocity.z);
 		if (Input.GetKey (KeyCode.Space)) {
 			//rb.angularVelocity.Set (new Vector3(0f,0f,-15f));
 			diver.GetComponent<Animator> ().SetBool ("Spinning", true);
-			diverRigidbody.angularVelocity = new Vector3 (0f, 0f, -trickSpin);
+			diverRigidbody.angularVelocity = new Vector3 (0f, 0f, trickSpin);
 			diverRigidbody.velocity = new Vector3 (trickHorizontalSpeed, verticalVelocity, currentVelocity.z);
 			diverRigidbody.AddForce (new Vector3 (0, -jumpHeightCompensate, 0));
 			//diverCollider.radius = 0.85f;
@@ -312,15 +312,15 @@ public class GameController : MonoBehaviour
 	}
 
 	void AddFlipCoins(int flips){
-		endRoundFlips.text = "Flips: " + flips;
+		//endRoundFlips.text = "Flips: " + flips;
 		int coins = flips * coinsPerFlip;
 		if (goodJump) {
-			controller.coins += coins;
-			endRoundCoins.text = "Coins: " + coins;
-			Debug.Log ("+" + coins + " coins!");
+			//controller.coins += coins;
+			//endRoundCoins.text = "Coins: " + coins;
+			//Debug.Log ("+" + coins + " coins!");
 			endRoundJump.text = "Good Jump!";
 		} else {
-			endRoundCoins.text = "Coins: 0";
+			//endRoundCoins.text = "Coins: 0";
 			endRoundJump.text = "Bad Jump!";
 		}
 

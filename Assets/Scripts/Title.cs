@@ -10,7 +10,7 @@ public class Title : MonoBehaviour {
 	}
 
 	public void PlayButton(){
-		SceneManager.LoadScene ("Main");
+		SceneManager.LoadScene ("Setting");
 	}
 	
 	// Update is called once per frame
