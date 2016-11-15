@@ -312,15 +312,15 @@ public class GameController : MonoBehaviour
 	}
 
 	void AddFlipCoins(int flips){
-		endRoundFlips.text = "Flips: " + flips;
+		//endRoundFlips.text = "Flips: " + flips;
 		int coins = flips * coinsPerFlip;
 		if (goodJump) {
-			controller.coins += coins;
-			endRoundCoins.text = "Coins: " + coins;
-			Debug.Log ("+" + coins + " coins!");
+			//controller.coins += coins;
+			//endRoundCoins.text = "Coins: " + coins;
+			//Debug.Log ("+" + coins + " coins!");
 			endRoundJump.text = "Good Jump!";
 		} else {
-			endRoundCoins.text = "Coins: 0";
+			//endRoundCoins.text = "Coins: 0";
 			endRoundJump.text = "Bad Jump!";
 		}
 
