@@ -164,6 +164,7 @@ ModelImporter:
     4300012: Tops
     7400000: mixamo.com
     9500000: //RootNode
+    11100000: //RootNode
     13700000: Body
     13700002: Bottoms
     13700004: Eyelashes
@@ -229,7 +230,7 @@ ModelImporter:
     rootMotionBoneName: 
     hasTranslationDoF: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 1
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
