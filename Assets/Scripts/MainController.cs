@@ -146,6 +146,8 @@ public class MainController : MonoBehaviour
 				selectScreen.SetActive (false);
 				selectScreenVisible = false;
 			} else {
+				gameController.waiting = false;
+				gameController.jumpBar.Initialize ();
 				float diverAux = -210;
 				float jumperAux = -210;
 				float platformAux = -210;
@@ -197,8 +199,6 @@ public class MainController : MonoBehaviour
 				for (int i = 0; i < 3; i++) {
 					containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
 				}
-
-				gameController.waiting = false;
 				selectScreen.SetActive (true);
 				selectScreenVisible = true;
 			}

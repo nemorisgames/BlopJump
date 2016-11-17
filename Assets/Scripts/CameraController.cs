@@ -44,7 +44,10 @@ public class CameraController : MonoBehaviour {
 					//transform.position = new Vector3 (newPos.x + jumperOffset.x + platformOffset.x, newPos.y + jumperOffset.y + platformOffset.y, newPos.z + initialDepth);
 					newPos = newPos + new Vector3 (jumperOffset.x + platformOffset.x, jumperOffset.y + platformOffset.y, initialDepth);
 				}
-				Vector3 delta = newPos - cam.ViewportToWorldPoint(new Vector3 (0.5f, 0.5f, 0f));
+				if (target.tag == "LandingSpot") {
+					newPos = newPos + new Vector3 (0f, diverOffset.y, initialDepth);
+				}
+				Vector3 delta = newPos - cam.ViewportToWorldPoint (new Vector3 (0.5f, 0.5f, 0f));
 				Vector3 destination = transform.position + delta;
 				transform.position = Vector3.SmoothDamp (transform.position, destination, ref velocity, dampTime);
 			}
@@ -63,5 +66,14 @@ public class CameraController : MonoBehaviour {
 		platformOffset = new Vector3 (platformOffset.x, p.cameraOffset, platformOffset.z);
 		min = new Vector3 (min.x, p.cameraMinHeight, min.z);
 		diverOffset = new Vector3 (diverOffset.x, jumperOffset.y + platformOffset.y, diverOffset.z);
+	}
+
+	public IEnumerator CameraPan(Transform player, Transform landingSpot){
+		gameController.waiting = false;
+		follow = true;
+		target = landingSpot;
+		yield return new WaitForSeconds (1f);
+		target = player;
+		gameController.waiting = true;
 	}
 }

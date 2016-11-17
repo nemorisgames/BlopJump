@@ -132,6 +132,7 @@ public class RewardMachine : MonoBehaviour {
 				rewardScreenVisible = false;
 				gameController.ResetRound ();
 			} else {
+				gameController.jumpBar.Initialize ();
 				UpdateCoins ();
 				infoLabel.text = "";
 				rewardBoxLabel.text = "???";

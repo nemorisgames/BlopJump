@@ -34,9 +34,9 @@ public class GameController : MonoBehaviour
 	public float verticalSpeed;
 
 	Rigidbody diverRigidbody; //rigidbody del diver
-	Diver diverProps; //propiedades del diver
+	public Diver diverProps; //propiedades del diver
 	GameObject diver;
-	bool controllingDiver;
+	public bool controllingDiver;
 	bool goodJump;
 
 	//temp
@@ -53,7 +53,6 @@ public class GameController : MonoBehaviour
 	public Vector3 jumperJumpForce;
 	public float compensateWeightHorizontal;
 	public float compensateWeightVertical;
-
 
 	GameObject jumper;
 	public bool controllingJumper;
@@ -73,6 +72,8 @@ public class GameController : MonoBehaviour
 	UILabel endRoundJump;
 	LandingSpot landingSpot;
 	//CapsuleCollider diverCollider;
+	public JumpBar jumpBar;
+	bool _canCountFlip = false;
 
 	// Use this for initialization
 	void Awake () 
@@ -88,6 +89,7 @@ public class GameController : MonoBehaviour
 		coinArea = GameObject.Find ("CoinArea");
 		coin = GameObject.Find ("Coin");
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
+		jumpBar = GameObject.FindGameObjectWithTag ("JumpBar").GetComponent<JumpBar> ();
 		Setup ();
 	}
 
@@ -95,14 +97,11 @@ public class GameController : MonoBehaviour
 	{
 		if (waiting) {
 			//when controlling Jumper
+			jumpBar.UpdateValue();
 			diver.GetComponent<Animator> ().SetBool ("Diving", false);
 			if (controllingJumper && !controllingDiver) {
 				if (Input.GetKeyDown (KeyCode.Space)) { //
-					//diver.GetComponent<Animator> ().SetTrigger ("Jump");
-					jumperRigidbody.AddForce (jumperJumpForce);
-					controllingJumper = false;
-					waiting = false;
-					playing = true;
+					JumperJump();
 				}
 			}
 		}
@@ -114,14 +113,20 @@ public class GameController : MonoBehaviour
 				if (diverProps.onGround) {
 					flips = 0;
 					WindupRotation = 0;
-					if (Input.GetKeyDown (KeyCode.Space) && testing)
-						DiverJump (diverJumpForce);
+					/*if (Input.GetKeyDown (KeyCode.Space) && testing)
+						DiverJump (diverJumpForce);*/
 				}
 
 				if (!diverProps.onGround) {
 					diver.GetComponent<Animator> ().SetBool ("Diving", true);
 					//diverCollider.radius = 0.55f;
-					SetDiverSpinSpeed (diverProps.spinSpeed, diverProps.trickSpinSpeed);
+					//SetDiverSpinSpeed (diverProps.spinSpeed, diverProps.trickSpinSpeed);
+					CalculateFlips();
+					if (Input.GetKey (KeyCode.Space) || Input.GetMouseButton(0)) {
+						DiverTrickSpin ();
+					} else {
+						DiverNormalSpin ();
+					}
 				}
 
 			}
@@ -135,7 +140,7 @@ public class GameController : MonoBehaviour
 
 	void LateUpdate()
 	{
-		if (diverRigidbody.position.y < -1) {
+		if (diverRigidbody.position.y < -1.6) {
 			if (landingSpot.getLanding ())
 				goodJump = false;
 			ToggleEndRoundScreen ();
@@ -178,7 +183,7 @@ public class GameController : MonoBehaviour
 		controllingDiver = false;
 
 		//Set up platform
-		platform = (GameObject)Instantiate(platformGameObject,platformGameObject.transform.position,Quaternion.identity);
+		platform = (GameObject)Instantiate(platformGameObject,platformGameObject.transform.position,platformGameObject.transform.rotation);
 		platformProps = platform.GetComponent<Platform> ();
 
 		//Set up jumper
@@ -199,25 +204,44 @@ public class GameController : MonoBehaviour
 
 	void SetDiverSpinSpeed(float normalSpin, float trickSpin)
 	{
-		CalculateFlips ();
+		CalculateFlips (); //calcula numero de giros
 		Vector3 currentVelocity = diverRigidbody.velocity;
 		float verticalVelocity = currentVelocity.y - verticalSpeed;
 		diverRigidbody.angularVelocity = new Vector3 (0f, 0f, normalSpin);
 		diverRigidbody.velocity = new Vector3 (normalHorizontalSpeed, currentVelocity.y, currentVelocity.z);
 		if (Input.GetKey (KeyCode.Space)) {
-			//rb.angularVelocity.Set (new Vector3(0f,0f,-15f));
-			diver.GetComponent<Animator> ().SetBool ("Spinning", true);
+			if (!diver.GetComponent<Animator> ().GetBool ("Spinning")) {
+				diver.GetComponent<Animator> ().SetBool ("Spinning", true);
+			}
 			diverRigidbody.angularVelocity = new Vector3 (0f, 0f, trickSpin);
 			diverRigidbody.velocity = new Vector3 (trickHorizontalSpeed, verticalVelocity, currentVelocity.z);
 			diverRigidbody.AddForce (new Vector3 (0, -jumpHeightCompensate, 0));
-			//diverCollider.radius = 0.85f;
 		} else {
 			diver.GetComponent<Animator> ().SetBool ("Spinning", false);
 		}
-
 	}
 
+
+	public void DiverNormalSpin(){
+		Vector3 currentVelocity = diverRigidbody.velocity;
+		diverRigidbody.angularVelocity = new Vector3 (0f, 0f, diverProps.spinSpeed);
+		diverRigidbody.velocity = new Vector3 (normalHorizontalSpeed, currentVelocity.y, currentVelocity.z);
+		diver.GetComponent<Animator> ().SetBool ("Spinning", false);
+	}
+
+	public void DiverTrickSpin(){
+		Vector3 currentVelocity = diverRigidbody.velocity;
+		float verticalVelocity = currentVelocity.y - verticalSpeed;
+		diverRigidbody.angularVelocity = new Vector3 (0f, 0f, diverProps.trickSpinSpeed);
+		diverRigidbody.velocity = new Vector3 (trickHorizontalSpeed, verticalVelocity, currentVelocity.z);
+		diverRigidbody.AddForce (new Vector3 (0, -jumpHeightCompensate, 0));
+		diver.GetComponent<Animator> ().SetBool ("Spinning", true);
+	}
+
+
 	public void ResetPosition(){
+		jumpBar.gameObject.SetActive (false);
+		playing = false;
 		diver.GetComponent<Animator> ().SetBool ("Spinning", false);
 		diver.GetComponent<Animator> ().SetBool ("Diving", false);
 		//diverCollider.radius = 0.55f;
@@ -243,18 +267,23 @@ public class GameController : MonoBehaviour
 		cam.GetComponent<CameraController>().follow = false;
 	}
 
-	public void ResetRound()
+	public void ResetRound() //reubica la cámara, muestra pantalla de fin de ronda
 	{
-		waiting = true;
-		playing = false;
-		cam.GetComponent<CameraController> ().target = jumper.transform;
-		cam.GetComponent<CameraController>().follow = true;
+		
+		//cam.GetComponent<CameraController> ().target = jumper.transform;
+		//cam.GetComponent<CameraController>().follow = true;
 		if (endRoundScreenVisible) {
 			ToggleEndRoundScreen ();
 		}
 		CoinCleanup ();
 		GenerateCoins (numCoins);
 		landingSpot.enableLanding (true);
+		//ToggleJumpBar ();
+		StartCoroutine (cam.GetComponent<CameraController> ().CameraPan(jumper.transform, landingSpot.transform));
+		jumpBar.gameObject.SetActive (true);
+		jumpBar.Initialize();
+		playing = false;
+		_canCountFlip = false;
 	}
 
 	void DiverJump(Vector3 jumpForce)
@@ -269,15 +298,17 @@ public class GameController : MonoBehaviour
 
 	void CalculateFlips()
 	{
-		deltaRotation = (currentRotation - diver.transform.eulerAngles.z);
-		currentRotation = diver.transform.eulerAngles.z;
-		if (deltaRotation >= 300) 
-			deltaRotation -= 360;
-		if (deltaRotation <= -300) 
-			deltaRotation += 360;
-		WindupRotation += (deltaRotation);
-
-		flips = WindupRotation / 360;
+		float _flipPoint = (Mathf.Round(diver.transform.up.normalized.y * 10) / 10);
+		if (_flipPoint != 1.0f)
+		{
+			_canCountFlip = true;
+		}
+		if ((_canCountFlip) && (_flipPoint == 1.0f))
+		{
+			flips++;
+			_canCountFlip = false;
+			Debug.Log(flips);
+		}
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -312,15 +343,15 @@ public class GameController : MonoBehaviour
 	}
 
 	void AddFlipCoins(int flips){
-		//endRoundFlips.text = "Flips: " + flips;
+		endRoundFlips.text = "Flips: " + flips;
 		int coins = flips * coinsPerFlip;
 		if (goodJump) {
-			//controller.coins += coins;
-			//endRoundCoins.text = "Coins: " + coins;
+			controller.coins += coins;
+			endRoundCoins.text = "Coins: " + coins;
 			//Debug.Log ("+" + coins + " coins!");
 			endRoundJump.text = "Good Jump!";
 		} else {
-			//endRoundCoins.text = "Coins: 0";
+			endRoundCoins.text = "Coins: 0";
 			endRoundJump.text = "Bad Jump!";
 		}
 
@@ -375,4 +406,22 @@ public class GameController : MonoBehaviour
 	public GameObject ReturnDiver(){
 		return diver;
 	}
+
+	/*void ToggleJumpBar(){
+		if (jumpBar.gameObject.activeSelf) {
+			jumpBar.gameObject.SetActive (false);
+		} else {
+			jumpBar.gameObject.SetActive (true);
+			JumpBarInit ();
+		}
+	}*/
+
+	public void JumperJump(){
+		jumperRigidbody.AddForce (jumperJumpForce);
+		//ToggleJumpBar ();
+		controllingJumper = false;
+		waiting = false;
+		playing = true;
+	}
+		
 }
