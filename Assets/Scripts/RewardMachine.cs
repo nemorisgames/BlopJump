@@ -124,13 +124,11 @@ public class RewardMachine : MonoBehaviour {
 			}
 			if (gameController.endRoundScreenVisible) {
 				gameController.ToggleEndRoundScreen ();
-				gameController.ResetPosition ();
 			}
 			if (rewardScreenVisible) {
 				controller.gameController.waiting = true;
 				rewardScreen.SetActive (false);
 				rewardScreenVisible = false;
-				gameController.ResetRound ();
 			} else {
 				gameController.jumpBar.Initialize ();
 				UpdateCoins ();
