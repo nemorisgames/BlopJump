@@ -188,7 +188,7 @@ public class GameController : MonoBehaviour
 
 		//Set up jumper
 		jumperPos = platform.transform.FindChild ("JumperPos").position;
-		jumper = (GameObject)Instantiate(jumperGameObject,jumperPos,Quaternion.identity);
+        jumper = (GameObject)Instantiate(jumperGameObject,jumperPos, Quaternion.Euler(new Vector3(0, -90, 0)));
 		jumperRigidbody = jumper.GetComponent<Rigidbody> ();
 		jumperProps = jumper.GetComponent<Jumper> ();
 
@@ -242,6 +242,11 @@ public class GameController : MonoBehaviour
 	public void ResetPosition(){
 		jumpBar.gameObject.SetActive (false);
 		playing = false;
+
+        jumper.GetComponent<CapsuleCollider>().enabled = true;
+
+        GetComponent<Animator>().SetBool("onAction", false);
+        jumper.GetComponent<Animator>().SetBool("onJump", false);
 		diver.GetComponent<Animator> ().SetBool ("Spinning", false);
 		diver.GetComponent<Animator> ().SetBool ("Diving", false);
 		//diverCollider.radius = 0.55f;
@@ -315,6 +320,7 @@ public class GameController : MonoBehaviour
 	{
 		if(other.tag == "Jumper")
 		{
+            GetComponent<Animator>().SetBool("onAction", true);
 			controllingDiver = true;
 			DiverJump (diverJumpForce);
 			enableWind = true;
@@ -419,6 +425,8 @@ public class GameController : MonoBehaviour
 
 	public void JumperJump(){
 		jumperRigidbody.AddForce (jumperJumpForce);
+        jumper.GetComponent<CapsuleCollider>().enabled = false;
+        jumper.GetComponent<Animator>().SetBool("onJump", true);
 		//ToggleJumpBar ();
 		controllingJumper = false;
 		waiting = false;
