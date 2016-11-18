@@ -16,6 +16,8 @@ public class CameraController : MonoBehaviour {
 	[HideInInspector]
 	public bool follow;
 	float dampTime = 0.15f;
+	float moveSpeed = 0.5f;
+	float slow = 0.1f;
 	Vector3 velocity = Vector3.zero;
 	Camera cam;
 
@@ -34,7 +36,7 @@ public class CameraController : MonoBehaviour {
 			if (newPos.y <= min.y) {
 				newPos = new Vector3 (newPos.x, min.y, newPos.z);
 			}
-
+			float move = moveSpeed;
 			if (target != null) {
 				if (target.tag == "Diver") {
 					//transform.position = new Vector3 (newPos.x + diverOffset.x, newPos.y + diverOffset.y, newPos.z + initialDepth - newPos.y / depthOffset);
@@ -46,9 +48,11 @@ public class CameraController : MonoBehaviour {
 				}
 				if (target.tag == "LandingSpot") {
 					newPos = newPos + new Vector3 (0f, diverOffset.y, initialDepth);
+					move = slow;
 				}
-				Vector3 delta = newPos - cam.ViewportToWorldPoint (new Vector3 (0.5f, 0.5f, 0f));
+				Vector3 delta = newPos - cam.ViewportToWorldPoint (new Vector3 (0.5f, move, 0f));
 				Vector3 destination = transform.position + delta;
+
 				transform.position = Vector3.SmoothDamp (transform.position, destination, ref velocity, dampTime);
 			}
 		}

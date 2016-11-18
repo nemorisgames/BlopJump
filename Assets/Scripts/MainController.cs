@@ -133,7 +133,6 @@ public class MainController : MonoBehaviour
 			}
 			if (gameController.endRoundScreenVisible) {
 				gameController.ToggleEndRoundScreen ();
-				gameController.ResetPosition ();
 			}
 			if (selectScreenVisible) {
 				for (int i = 0; i < 3; i++) {
@@ -220,6 +219,7 @@ public class MainController : MonoBehaviour
 		{
 			gameController.platformGameObject = u.gameObject;
 		}
+		gameController.ResetPosition ();
 		gameController.Setup ();
 		ToggleSelectScreen ();
 	}
@@ -248,12 +248,14 @@ public class MainController : MonoBehaviour
 		if (selectScreenVisible) {
 			ToggleSelectScreen ();
 			LastLoadout ();
+			gameController.ResetRound ();
 		} else if (rewardMachine.rewardScreenVisible) {
 			rewardMachine.ToggleRewardScreen ();
+			gameController.ResetRound ();
 		} else if (gameController.endRoundScreenVisible) {
 			gameController.ToggleEndRoundScreen ();
 			gameController.ResetRound ();
-		} 
+		}
 	}
 
 	public IEnumerator PlusCoin(int value){

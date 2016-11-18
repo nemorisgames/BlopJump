@@ -348,7 +348,6 @@ public class GameController : MonoBehaviour
 		if (goodJump) {
 			controller.coins += coins;
 			endRoundCoins.text = "Coins: " + coins;
-			//Debug.Log ("+" + coins + " coins!");
 			endRoundJump.text = "Good Jump!";
 		} else {
 			endRoundCoins.text = "Coins: 0";
@@ -373,17 +372,28 @@ public class GameController : MonoBehaviour
 
 	void GenerateCoins(int c){
 		BoxCollider area = coinArea.GetComponentInChildren<BoxCollider> ();
-		float size = area.bounds.extents.x;
+		float sizeX = area.bounds.extents.x;
+		float sizeY = area.bounds.extents.y;
+		float coinAreaX = coinArea.transform.FindChild("Area").transform.position.x - sizeX;
+		float landingSpotX = landingSpot.transform.position.x - landingSpot.GetComponent<BoxCollider> ().bounds.extents.x;
+		Debug.Log (coinAreaX + " " + landingSpotX);
+		while (coinAreaX > landingSpotX) {
+			coinArea.transform.localScale += new Vector3(1f,0f,0f);
+			sizeX = area.bounds.extents.x;
+			Debug.Log (coinAreaX + " " + landingSpotX);
+			coinAreaX = coinArea.transform.FindChild("Area").transform.position.x - sizeX;
+
+		}
 		//Vector3 center = area.center;
 		Vector3 pos = area.transform.position;
 		float lastX = 0;
 		//Debug.Log (center + " " + pos);
 		for (int i = 0; i < c; i++) {
-			float randX = Random.Range (pos.x - size, pos.x + size);
-			float randY = Random.Range (pos.y, pos.y + size);
+			float randX = Random.Range (pos.x - sizeX, pos.x + sizeX);
+			float randY = Random.Range (pos.y, pos.y + sizeY);
 			if (i != 0) {
 				while (Mathf.Abs (randX - lastX) < coinSpacing) {
-					randX = Random.Range (pos.x - size, pos.x + size);
+					randX = Random.Range (pos.x - sizeX, pos.x + sizeX);
 				}
 			}
 			lastX = randX;
@@ -406,15 +416,6 @@ public class GameController : MonoBehaviour
 	public GameObject ReturnDiver(){
 		return diver;
 	}
-
-	/*void ToggleJumpBar(){
-		if (jumpBar.gameObject.activeSelf) {
-			jumpBar.gameObject.SetActive (false);
-		} else {
-			jumpBar.gameObject.SetActive (true);
-			JumpBarInit ();
-		}
-	}*/
 
 	public void JumperJump(){
 		jumperRigidbody.AddForce (jumperJumpForce);
