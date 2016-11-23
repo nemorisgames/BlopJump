@@ -75,6 +75,8 @@ public class GameController : MonoBehaviour
 	public JumpBar jumpBar;
 	bool _canCountFlip = false;
 
+	float maxHeight;
+
 	// Use this for initialization
 	void Awake () 
 	{
@@ -91,6 +93,8 @@ public class GameController : MonoBehaviour
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
 		jumpBar = GameObject.FindGameObjectWithTag ("JumpBar").GetComponent<JumpBar> ();
 		Setup ();
+
+		maxHeight = 0;
 	}
 
 	void FixedUpdate()
@@ -122,6 +126,9 @@ public class GameController : MonoBehaviour
 					//diverCollider.radius = 0.55f;
 					//SetDiverSpinSpeed (diverProps.spinSpeed, diverProps.trickSpinSpeed);
 					CalculateFlips();
+					if (diver.transform.position.y > maxHeight) {
+						maxHeight = diver.transform.position.y;
+					}
 					if (Input.GetKey (KeyCode.Space) || Input.GetMouseButton(0)) {
 						DiverTrickSpin ();
 					} else {
@@ -255,13 +262,12 @@ public class GameController : MonoBehaviour
 		AddFlipCoins (Mathf.FloorToInt (flips));
 		Debug.Log ("Flips: "+Mathf.Round (flips));
 
-		//Debug.Log ("Flips: "+(flips%0.5f));
 		jumpEnd = Time.time;
 		flips = 0;
 		WindupRotation = 0;
 		enableWind = false;
 
-		//Debug.Log (diverRigidbody.position.x);
+		Debug.Log ("x: "+diverRigidbody.position.x + ", y: "+maxHeight);
 		Debug.Log ("Time: "+(jumpEnd - jumpStart));
 
 		diverRigidbody.velocity = Vector3.zero;
@@ -291,11 +297,17 @@ public class GameController : MonoBehaviour
 		jumpBar.Initialize();
 		playing = false;
 		_canCountFlip = false;
+
+		maxHeight = 0;
 	}
 
 	void DiverJump(Vector3 jumpForce)
 	{
-		Vector3 jump = new Vector3 (jumpForce.x + jumperProps.weight/compensateWeightHorizontal + compensatePlatformHeight*platformProps.height, jumpForce.y * jumperProps.weight/compensateWeightVertical + compensatePlatformHeight *platformProps.height, jumpForce.z);
+		float platformComp = 1 + platformProps.height * 0.1f;
+		float jumperWeightX = jumperProps.weight / compensateWeightHorizontal * platformComp;
+		float jumperWeightY = jumperProps.weight * compensateWeightVertical / (3 - platformComp);
+		Vector3 jump = new Vector3 (jumpForce.x + jumperWeightX - compensatePlatformHeight*platformProps.height, jumpForce.y + jumperWeightY + compensatePlatformHeight * platformProps.height, jumpForce.z);
+		Debug.Log (jump.x + " " + jump.y);
 		diverRigidbody.AddForce (jump);
 		jumpStart = Time.time;
 		cam.GetComponent<CameraController> ().target = diver.transform;
