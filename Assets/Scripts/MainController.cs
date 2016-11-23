@@ -248,7 +248,9 @@ public class MainController : MonoBehaviour
 		if (selectScreenVisible) {
 			ToggleSelectScreen ();
 			LastLoadout ();
-			gameController.ResetRound ();
+			if (!gameController.controllingJumper) {
+				gameController.ResetRound ();
+			}
 		} else if (rewardMachine.rewardScreenVisible) {
 			rewardMachine.ToggleRewardScreen ();
 			gameController.ResetRound ();

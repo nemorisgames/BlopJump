@@ -22,7 +22,7 @@ public class LandingSpot : MonoBehaviour {
 			{
 				gameController.GoodJump (false);
 			}
-			else if (c.tag == "Body") 
+			else if (c.tag == "Diver") 
 			{
 				gameController.GoodJump (false);
 			}

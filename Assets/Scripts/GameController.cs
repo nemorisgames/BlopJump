@@ -174,6 +174,7 @@ public class GameController : MonoBehaviour
 
 		diver = (GameObject)Instantiate(diverGameObject,diverPos.position,diverPos.rotation);
 		diverRigidbody = diver.GetComponent<Rigidbody> ();
+		diverRigidbody.position = diverPos.position;
 		diverProps = diver.GetComponent<Diver> ();
 		normalHorizontalSpeed = diverJumpForce.x / 50;
 		trickHorizontalSpeed = normalHorizontalSpeed / 2;
@@ -240,6 +241,7 @@ public class GameController : MonoBehaviour
 
 
 	public void ResetPosition(){
+		GetComponent<Animator> ().SetBool ("onAction", false);
 		jumpBar.gameObject.SetActive (false);
 		playing = false;
 
@@ -267,19 +269,19 @@ public class GameController : MonoBehaviour
 		diverRigidbody.rotation = diverPos.rotation;
 		diverRigidbody.position = diverPos.position;
 		jumperRigidbody.position = jumperPos;
-		controllingJumper = true;
-		controllingDiver = false;
+
 		cam.GetComponent<CameraController>().follow = false;
 	}
 
 	public void ResetRound() //reubica la cámara, muestra pantalla de fin de ronda
 	{
-		
 		//cam.GetComponent<CameraController> ().target = jumper.transform;
 		//cam.GetComponent<CameraController>().follow = true;
 		if (endRoundScreenVisible) {
 			ToggleEndRoundScreen ();
 		}
+		controllingJumper = true;
+		controllingDiver = false;
 		CoinCleanup ();
 		GenerateCoins (numCoins);
 		landingSpot.enableLanding (true);
@@ -344,7 +346,7 @@ public class GameController : MonoBehaviour
 	{
 		if(other.tag == "Diver")
 		{
-			diverProps.onGround = false;
+			StartCoroutine (DiverJumpDelay());
 		};
 	}
 
@@ -432,5 +434,9 @@ public class GameController : MonoBehaviour
 		waiting = false;
 		playing = true;
 	}
-		
+
+	IEnumerator DiverJumpDelay(){
+		yield return new WaitForSeconds (0.1f);
+		diverProps.onGround = false;
+	}
 }
