@@ -71,6 +71,7 @@ public class GameController : MonoBehaviour
 	UILabel endRoundCoins;
 	UILabel endRoundJump;
 	LandingSpot landingSpot;
+	BoxCollider landingSpotBC;
 	//CapsuleCollider diverCollider;
 	public JumpBar jumpBar;
 	bool _canCountFlip = false;
@@ -91,6 +92,7 @@ public class GameController : MonoBehaviour
 		coinArea = GameObject.Find ("CoinArea");
 		coin = GameObject.Find ("Coin");
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
+		landingSpotBC = landingSpot.gameObject.GetComponent<BoxCollider> ();
 		jumpBar = GameObject.FindGameObjectWithTag ("JumpBar").GetComponent<JumpBar> ();
 		Setup ();
 
@@ -291,8 +293,9 @@ public class GameController : MonoBehaviour
 		CoinCleanup ();
 		GenerateCoins (numCoins);
 		landingSpot.enableLanding (true);
+		SetLandingSpot ();
 		//ToggleJumpBar ();
-		StartCoroutine (cam.GetComponent<CameraController> ().CameraPan(jumper.transform, landingSpot.transform));
+		StartCoroutine (cam.GetComponent<CameraController> ().CameraPan(jumper.transform, diver.transform, landingSpot.transform));
 		jumpBar.gameObject.SetActive (true);
 		jumpBar.Initialize();
 		playing = false;
@@ -303,6 +306,7 @@ public class GameController : MonoBehaviour
 
 	void DiverJump(Vector3 jumpForce)
 	{
+		compensateWeightVertical = jumpBar.GetComponent<UISlider> ().value * 2;
 		float platformComp = 1 + platformProps.height * 0.1f;
 		float jumperWeightX = jumperProps.weight / compensateWeightHorizontal * platformComp;
 		float jumperWeightY = jumperProps.weight * compensateWeightVertical / (3 - platformComp);
@@ -451,4 +455,11 @@ public class GameController : MonoBehaviour
 		yield return new WaitForSeconds (0.1f);
 		diverProps.onGround = false;
 	}
+
+	public void SetLandingSpot(){
+		//Debug.Log (landingSpot.minDistance [jumperProps.index, platformProps.index] + " " + landingSpot.maxDistance [jumperProps.index, platformProps.index]);
+		float rand = Random.Range (landingSpot.maxDistance [jumperProps.index, platformProps.index], landingSpot.minDistance [jumperProps.index, platformProps.index] + landingSpotBC.size.x/2);
+		landingSpot.transform.position = new Vector3 (rand, landingSpot.transform.position.y, landingSpot.transform.position.z);
+	}
+		
 }

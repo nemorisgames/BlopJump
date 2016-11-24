@@ -17,7 +17,7 @@ public class CameraController : MonoBehaviour {
 	public bool follow;
 	float dampTime = 0.15f;
 	float moveSpeed = 0.5f;
-	float slow = 0.1f;
+	float slow = 0.001f;
 	Vector3 velocity = Vector3.zero;
 	Camera cam;
 
@@ -47,7 +47,7 @@ public class CameraController : MonoBehaviour {
 					newPos = newPos + new Vector3 (jumperOffset.x + platformOffset.x, jumperOffset.y + platformOffset.y, initialDepth);
 				}
 				if (target.tag == "LandingSpot") {
-					newPos = newPos + new Vector3 (0f, diverOffset.y, initialDepth);
+					newPos = newPos + new Vector3 (0f, diverOffset.y, initialDepth - depthOffset);
 					move = slow;
 				}
 				Vector3 delta = newPos - cam.ViewportToWorldPoint (new Vector3 (0.5f, move, 0f));
@@ -72,12 +72,16 @@ public class CameraController : MonoBehaviour {
 		diverOffset = new Vector3 (diverOffset.x, jumperOffset.y + platformOffset.y, diverOffset.z);
 	}
 
-	public IEnumerator CameraPan(Transform player, Transform landingSpot){
+	public IEnumerator CameraPan(Transform jumper, Transform diver, Transform landingSpot){
 		gameController.waiting = false;
+		depthOffset = -3f;
 		follow = true;
 		target = landingSpot;
 		yield return new WaitForSeconds (1f);
-		target = player;
+		target = diver;
+		yield return new WaitForSeconds (0.5f);
+		target = jumper;
+		depthOffset = -0.7f;
 		gameController.waiting = true;
 	}
 }
