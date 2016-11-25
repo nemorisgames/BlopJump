@@ -114,6 +114,7 @@ public class GameController : MonoBehaviour
 
 		if (playing) 
 		{
+			CalculateDistance ();
 			//when controlling Diver
 			if (!controllingJumper && controllingDiver) {
 				if (diverProps.onGround) {
@@ -147,9 +148,16 @@ public class GameController : MonoBehaviour
 		}
 	}
 
+	void CalculateDistance(){
+		float distance = (diverRigidbody.position.x - landingSpot.transform.position.x);
+		if (distance < 0)
+			distance = 0;
+		controller.distanceLabel.text = "Distance: " + Mathf.FloorToInt(distance)+"m";
+	}
+
 	void LateUpdate()
 	{
-		if (diverRigidbody.position.y < -1.6) {
+		if (diverRigidbody.position.y < -2) {
 			if (landingSpot.getLanding ())
 				goodJump = false;
 			ToggleEndRoundScreen ();
@@ -294,6 +302,7 @@ public class GameController : MonoBehaviour
 		GenerateCoins (numCoins);
 		landingSpot.enableLanding (true);
 		SetLandingSpot ();
+		CalculateDistance ();
 		//ToggleJumpBar ();
 		StartCoroutine (cam.GetComponent<CameraController> ().CameraPan(jumper.transform, diver.transform, landingSpot.transform));
 		jumpBar.gameObject.SetActive (true);
@@ -457,9 +466,14 @@ public class GameController : MonoBehaviour
 	}
 
 	public void SetLandingSpot(){
+		//Debug.Log (LandingSpotExtent ());
 		//Debug.Log (landingSpot.minDistance [jumperProps.index, platformProps.index] + " " + landingSpot.maxDistance [jumperProps.index, platformProps.index]);
-		float rand = Random.Range (landingSpot.maxDistance [jumperProps.index, platformProps.index], landingSpot.minDistance [jumperProps.index, platformProps.index] + landingSpotBC.size.x/2);
+		float rand = Random.Range (landingSpot.maxDistance [jumperProps.index, platformProps.index], landingSpot.minDistance [jumperProps.index, platformProps.index] + LandingSpotExtent());
 		landingSpot.transform.position = new Vector3 (rand, landingSpot.transform.position.y, landingSpot.transform.position.z);
+	}
+
+	public float LandingSpotExtent(){
+		return landingSpotBC.size.x;
 	}
 		
 }

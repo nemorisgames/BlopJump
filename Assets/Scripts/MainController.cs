@@ -38,9 +38,9 @@ public class MainController : MonoBehaviour
 	[HideInInspector]
 	public bool selectScreenVisible = false;
 	UILabel coinsLabel;
-	UILabel plusCoinLabel;
-	GameObject plusCoin;
-	TweenAlpha plusCoinTween;
+	public UILabel distanceLabel;
+	GameObject distance;
+	//TweenAlpha distanceTween;
 
 	// Use this for initialization
 	void Awake () 
@@ -54,17 +54,17 @@ public class MainController : MonoBehaviour
 		rewardMachine.LoadTier ();
 		Debug.Log ("Presiona 'L' para ver lista de items y estado, 'R' para desbloquear un item");
 		coinsLabel = GameObject.Find ("Coins").GetComponent<UILabel> ();
-		plusCoin = GameObject.Find ("PlusCoin");
-		plusCoinLabel = plusCoin.GetComponent<UILabel> ();
-		plusCoinTween = plusCoin.GetComponent<TweenAlpha> ();
+		distance = GameObject.Find ("Distance");
+		distanceLabel = distance.GetComponent<UILabel> ();
+		//distanceTween = distance.GetComponent<TweenAlpha> ();
 		selectScreen.SetActive (false);
 		LoadDefaults ();
 	}
 
-	void Start(){
+	/*void Start(){
 		plusCoinTween.ResetToBeginning ();
 		plusCoinTween.value = 0;
-	}
+	}*/
 
 	// Update is called once per frame
 	void Update () 
@@ -225,9 +225,9 @@ public class MainController : MonoBehaviour
 	}
 
 	void LoadDefaults(){
-		diverKey = 0;
-		jumperKey = 6;
-		platformKey = 11;
+		diverKey = 0; //wetsuit diver
+		jumperKey = 7; //normal jumper
+		platformKey = 13; //metal platform
 		Unlockable u;
 		if (unlockables.TryGetValue (diverKey, out u)) 
 		{
@@ -248,7 +248,7 @@ public class MainController : MonoBehaviour
 		if (selectScreenVisible) {
 			ToggleSelectScreen ();
 			LastLoadout ();
-			if (!gameController.controllingJumper) {
+			if (gameController.controllingDiver) {
 				gameController.ResetRound ();
 			}
 		} else if (rewardMachine.rewardScreenVisible) {
@@ -260,12 +260,12 @@ public class MainController : MonoBehaviour
 		}
 	}
 
-	public IEnumerator PlusCoin(int value){
+	/*public IEnumerator PlusCoin(int value){
 		plusCoinLabel.text = "+" + value;
 		plusCoinTween.Toggle ();
 		yield return new WaitForSeconds (1.2f);
 		plusCoinTween.Toggle ();
-	}
+	}*/
 
 	void UnlockAll(){ //for testing purposes only
 		foreach(KeyValuePair<int,Unlockable> u in unlockables){

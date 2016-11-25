@@ -41,7 +41,10 @@ public class LandingSpot : MonoBehaviour {
 			}
 			else if (c.tag == "Arm" || c.tag == "Foot") 
 			{
-				gameController.GoodJump (true);
+				if (c.transform.position.x > transform.position.x - gameController.LandingSpotExtent ())
+					gameController.GoodJump (true);
+				else
+					gameController.GoodJump (false);
 			} 
 		}
 		_enabled = false;

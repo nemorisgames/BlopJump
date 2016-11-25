@@ -20,6 +20,7 @@ public class RewardMachine : MonoBehaviour {
 	UILabel infoLabel;
 	UILabel rewardBoxLabel;
 	UILabel rewardButtonLabel;
+	UISprite rewardBox;
 
 	GameController gameController;
 
@@ -32,6 +33,7 @@ public class RewardMachine : MonoBehaviour {
 		rewardScreen.SetActive (false);
 		infoLabel = rewardScreen.transform.FindChild ("Info").GetComponent<UILabel> ();
 		rewardBoxLabel = rewardScreen.transform.FindChild ("RewardItem").transform.FindChild ("Label").GetComponent<UILabel> ();
+		rewardBox = rewardScreen.transform.FindChild ("RewardItem").transform.FindChild ("Checked").GetComponent<UISprite> ();
 		rewardButtonLabel = rewardScreen.transform.FindChild ("RewardButton").transform.FindChild ("Label").GetComponent<UILabel> ();
 	}
 	
@@ -50,18 +52,7 @@ public class RewardMachine : MonoBehaviour {
 	public void GetReward()
 	{
 		if (availableRewards.Count > 0 && controller.coins >= tierCost [currentTier]) {
-			int key = GetRandom ();
-			Unlockable u;
-			if (controller.unlockables.TryGetValue (key, out u)) 
-			{
-				UnlockItem (u, key);
-			};
-			controller.coins -= tierCost [currentTier];
-			rewardBoxLabel.text = u.name;
-			infoLabel.text = "Item unlocked!";
-			rewardButtonLabel.text = "Get Reward (" + tierCost [currentTier]+" coins)";
-
-			UpdateCoins ();
+			StartCoroutine (RewardMachineEffect (20));
 		}
 		else if (controller.coins < tierCost [currentTier]) 
 		{
@@ -73,6 +64,25 @@ public class RewardMachine : MonoBehaviour {
 			infoLabel.text = "All items are unlocked!";
 			Debug.Log ("All items are unlocked!");
 		}
+	}
+
+	IEnumerator RewardMachineEffect(int length){
+		Unlockable u;
+		int key;
+		for (int i = 0; i < length; i++) {
+			key = GetRandom ();
+			if (controller.unlockables.TryGetValue (key, out u)) {
+				rewardBoxLabel.text = u.name;
+			}
+			if(i == length-1)
+				UnlockItem (u, key);
+			yield return new WaitForSeconds (i / 20);
+		}
+		controller.coins -= tierCost [currentTier];
+		//rewardBoxLabel.text = u.name;
+		infoLabel.text = "Item unlocked!";
+		rewardButtonLabel.text = "Get Reward (" + tierCost [currentTier]+" coins)";
+		UpdateCoins ();
 	}
 
 	//carga los unlockables del tier indicado
