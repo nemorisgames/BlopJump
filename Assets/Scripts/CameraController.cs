@@ -16,7 +16,7 @@ public class CameraController : MonoBehaviour {
 	[HideInInspector]
 	public bool follow;
 	float dampTime = 0.15f;
-	float moveSpeed = 0.5f;
+	float moveSpeed = 0.4f;
 	float slow = 0.001f;
 	Vector3 velocity = Vector3.zero;
 	Camera cam;
@@ -39,8 +39,10 @@ public class CameraController : MonoBehaviour {
 			float move = moveSpeed;
 			if (target != null) {
 				if (target.tag == "Diver") {
-					//transform.position = new Vector3 (newPos.x + diverOffset.x, newPos.y + diverOffset.y, newPos.z + initialDepth - newPos.y / depthOffset);
-					newPos = newPos + new Vector3 (diverOffset.x, diverOffset.y, initialDepth - newPos.y / depthOffset);
+					if(gameController.controllingDiver)
+						newPos = newPos + new Vector3 (diverOffset.x, diverOffset.y, initialDepth - newPos.y / depthOffset);
+					else
+						newPos = newPos + new Vector3 (diverOffset.x, diverOffset.y, initialDepth - depthOffset);
 				}
 				if (target.tag == "Jumper") {
 					//transform.position = new Vector3 (newPos.x + jumperOffset.x + platformOffset.x, newPos.y + jumperOffset.y + platformOffset.y, newPos.z + initialDepth);
@@ -74,12 +76,12 @@ public class CameraController : MonoBehaviour {
 
 	public IEnumerator CameraPan(Transform jumper, Transform diver, Transform landingSpot){
 		gameController.waiting = false;
-		depthOffset = -3f;
+		depthOffset = -8f;
 		follow = true;
 		target = landingSpot;
-		yield return new WaitForSeconds (1f);
+		yield return new WaitForSeconds (1.5f);
 		target = diver;
-		yield return new WaitForSeconds (0.5f);
+		yield return new WaitForSeconds (1f);
 		target = jumper;
 		depthOffset = -0.7f;
 		gameController.waiting = true;

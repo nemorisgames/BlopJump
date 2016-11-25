@@ -8,15 +8,12 @@ public class Coin : MonoBehaviour {
 
 	void Awake(){
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController>();
-		if (controller == null) {
-			Debug.Log ("oops");
-		}
 	}
 	
 	void OnTriggerEnter(Collider other){
 		if (other.tag == "Diver") {
 			controller.coins += value;
-			StartCoroutine (controller.PlusCoin (value));
+			//StartCoroutine (controller.PlusCoin (value));
 			Destroy (this.gameObject);
 		}
 	}
