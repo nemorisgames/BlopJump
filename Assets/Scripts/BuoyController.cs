@@ -6,6 +6,7 @@ public class BuoyController : MonoBehaviour {
     public  GameObject buoyPrefab;  // prefab de las boyas.
     public float radius;            // radio de generacion de boyas.
     public float angle = 30;        // angulo de separacion entre cada voya.
+    public bool randRotation = false;
 
     private float _buoyCuantity;    // cantidad de boyas.
     private Transform _t;           // transform del landing spot.
@@ -19,7 +20,14 @@ public class BuoyController : MonoBehaviour {
         {
             float j = angle * i;
             Vector3 p = _t.position + LengthDir(j, radius);
-            Instantiate(buoyPrefab, p, Quaternion.identity, _t);
+
+            Quaternion r;
+            if (randRotation)
+                r = Quaternion.Euler(new Vector3(0f, 0f, Random.Range(-26, 26)));
+            else
+                r = Quaternion.identity;
+            
+            Instantiate(buoyPrefab, p, r, _t);
         }
 
 	}
