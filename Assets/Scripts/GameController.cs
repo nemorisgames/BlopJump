@@ -75,8 +75,12 @@ public class GameController : MonoBehaviour
 	//CapsuleCollider diverCollider;
 	public JumpBar jumpBar;
 	bool _canCountFlip = false;
+	[Header("Particles")]
+	public GameObject splashBlop;
+	public GameObject splashDiver;
 
 	float maxHeight;
+	bool splash;
 
 	// Use this for initialization
 	void Awake () 
@@ -137,6 +141,10 @@ public class GameController : MonoBehaviour
 					} else {
 						DiverNormalSpin ();
 					}
+					if (diverRigidbody.position.y < 0.11 && !splash) {
+						Instantiate (splashDiver, diverRigidbody.transform.position, splashDiver.transform.rotation);
+						splash = true;
+					}
 				}
 
 			}
@@ -163,8 +171,6 @@ public class GameController : MonoBehaviour
 			ToggleEndRoundScreen ();
 			//ResetRound ();
 		}
-
-
 	}
 
 	public void Setup()
@@ -216,7 +222,7 @@ public class GameController : MonoBehaviour
 		jumperJumpForce = new Vector3 (platformProps.jumpForceX, jumperJumpForce.y, jumperJumpForce.z);
 		//cam.gameObject.GetComponent<GenericMoveCamera> ().LookAtTarget = diver;
 
-		GenerateCoins (numCoins);
+		//GenerateCoins (numCoins);
 		ResetRound ();
 	}
 
@@ -285,7 +291,7 @@ public class GameController : MonoBehaviour
 		diverRigidbody.rotation = diverPos.rotation;
 		diverRigidbody.position = diverPos.position;
 		jumperRigidbody.position = jumperPos;
-
+		splash = false;
 		cam.GetComponent<CameraController>().follow = false;
 	}
 
@@ -298,8 +304,8 @@ public class GameController : MonoBehaviour
 		}
 		controllingJumper = true;
 		controllingDiver = false;
-		CoinCleanup ();
-		GenerateCoins (numCoins);
+		//CoinCleanup ();
+		//GenerateCoins (numCoins);
 		landingSpot.enableLanding (true);
 		SetLandingSpot ();
 		CalculateDistance ();
@@ -309,7 +315,7 @@ public class GameController : MonoBehaviour
 		jumpBar.Initialize();
 		playing = false;
 		_canCountFlip = false;
-
+		SplashCleanup ();
 		maxHeight = 0;
 	}
 
@@ -347,7 +353,8 @@ public class GameController : MonoBehaviour
 	{
 		if(other.tag == "Jumper")
 		{
-            GetComponent<Animator>().SetBool("onAction", true);
+			Instantiate (splashBlop, splashBlop.transform.position, splashBlop.transform.rotation);
+			GetComponent<Animator>().SetBool("onAction", true);
 			controllingDiver = true;
 			DiverJump (diverJumpForce);
 			enableWind = true;
@@ -403,7 +410,7 @@ public class GameController : MonoBehaviour
 		}
 	}
 
-	void GenerateCoins(int c){
+	/*void GenerateCoins(int c){
 		BoxCollider area = coinArea.GetComponentInChildren<BoxCollider> ();
 		float sizeX = area.bounds.extents.x;
 		float sizeY = area.bounds.extents.y;
@@ -440,8 +447,15 @@ public class GameController : MonoBehaviour
 		for (int i = 0; i < coinsInScene.Length; i++) {
 			Destroy (coinsInScene [i]);
 		}
+	}*/
+
+	void SplashCleanup(){
+		GameObject[] splashes = GameObject.FindGameObjectsWithTag ("Splash");
+		for (int i = 0; i < splashes.Length; i++) {
+			Destroy (splashes [i]);
+		}
 	}
-		
+
 	public void GoodJump(bool b){
 		goodJump = b;
 	}
@@ -473,7 +487,7 @@ public class GameController : MonoBehaviour
 	}
 
 	public float LandingSpotExtent(){
-		return landingSpotBC.size.x;
+		return landingSpotBC.size.x/2;
 	}
 		
 }

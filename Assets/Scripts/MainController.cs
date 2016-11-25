@@ -47,6 +47,7 @@ public class MainController : MonoBehaviour
 	{
 		unlockables = new Dictionary<int,Unlockable> ();
 		LoadUnlockables ();
+		LoadDefaults ();
 		gameController = GameObject.FindGameObjectWithTag ("Blop").GetComponent<GameController> ();
 		gameController.playing = false;
 		rewardMachine = GameObject.FindGameObjectWithTag ("RewardMachine").GetComponent<RewardMachine> ();
@@ -58,7 +59,6 @@ public class MainController : MonoBehaviour
 		distanceLabel = distance.GetComponent<UILabel> ();
 		//distanceTween = distance.GetComponent<TweenAlpha> ();
 		selectScreen.SetActive (false);
-		LoadDefaults ();
 	}
 
 	/*void Start(){
@@ -160,6 +160,7 @@ public class MainController : MonoBehaviour
 							box.name = u.Key.ToString ();
 							box.tag = "Diver";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Diver> ().name;
+
 							box.transform.localPosition = new Vector3 (diverAux, box.transform.position.y, box.transform.position.z);
 							box.GetComponent<UIToggle> ().group = 1;
 							diverAux += boxDistance;
@@ -173,6 +174,7 @@ public class MainController : MonoBehaviour
 							box.name = u.Key.ToString ();
 							box.tag = "Jumper";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Jumper> ().name;
+							box.GetComponent<UIDragScrollView> ().scrollView = GetComponentInParent<UIScrollView> ();
 							box.transform.localPosition = new Vector3 (jumperAux, box.transform.position.y, box.transform.position.z);
 							box.GetComponent<UIToggle> ().group = 2;
 							jumperAux += boxDistance;
@@ -185,6 +187,7 @@ public class MainController : MonoBehaviour
 							box.name = u.Key.ToString ();
 							box.tag = "Platform";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Platform> ().name;
+							box.GetComponent<UIDragScrollView> ().scrollView = GetComponentInParent<UIScrollView> ();
 							box.transform.localPosition = new Vector3 (platformAux, box.transform.position.y, box.transform.position.z);
 							box.GetComponent<UIToggle> ().group = 3;
 							platformAux += boxDistance;
