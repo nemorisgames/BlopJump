@@ -82,6 +82,9 @@ public class GameController : MonoBehaviour
 	float maxHeight;
 	bool splash;
 
+    public AudioSource sourceSFX;
+    public AudioClip[] waterSFX;
+    public AudioClip[] blobSFX;
 	// Use this for initialization
 	void Awake () 
 	{
@@ -142,6 +145,8 @@ public class GameController : MonoBehaviour
 						DiverNormalSpin ();
 					}
 					if (diverRigidbody.position.y < 0.11 && !splash) {
+                        sourceSFX.clip = waterSFX[2];
+                        sourceSFX.Play();
 						Instantiate (splashDiver, diverRigidbody.transform.position, splashDiver.transform.rotation);
 						splash = true;
 					}
@@ -353,6 +358,10 @@ public class GameController : MonoBehaviour
 	{
 		if(other.tag == "Jumper")
 		{
+            //sourceSFX.clip = waterSFX[4];
+            //sourceSFX.Play();
+            sourceSFX.clip = blobSFX[0];
+            sourceSFX.Play();
 			Instantiate (splashBlop, splashBlop.transform.position, splashBlop.transform.rotation);
 			GetComponent<Animator>().SetBool("onAction", true);
 			controllingDiver = true;
