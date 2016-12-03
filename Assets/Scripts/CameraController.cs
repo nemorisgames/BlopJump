@@ -20,6 +20,9 @@ public class CameraController : MonoBehaviour {
 	float slow = 0.001f;
 	Vector3 velocity = Vector3.zero;
 	Camera cam;
+	public bool platformViewToggled = false;
+	GameObject platformButton;
+	UILabel platformButtonLabel;
 
 	void Awake(){
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController> ();
@@ -27,6 +30,9 @@ public class CameraController : MonoBehaviour {
 		jumperOffset = new Vector3 (-1.6f, 2.5f, 0f);
 		follow = true;
 		cam = Camera.main;
+		platformButton = GameObject.Find ("PlatformButton");
+		platformButtonLabel = platformButton.GetComponentInChildren<UILabel> ();
+		platformButton.SetActive (false);
 	}
 
 	// Update is called once per frame
@@ -74,16 +80,52 @@ public class CameraController : MonoBehaviour {
 		diverOffset = new Vector3 (diverOffset.x, jumperOffset.y + platformOffset.y, diverOffset.z);
 	}
 
-	public IEnumerator CameraPan(Transform jumper, Transform diver, Transform landingSpot){
+	public IEnumerator CameraPan(Transform end, Transform mid, Transform start){
+		platformButton.SetActive (false);
 		gameController.waiting = false;
 		depthOffset = -8f;
 		follow = true;
-		target = landingSpot;
+		target = start;
 		yield return new WaitForSeconds (1.5f);
-		target = diver;
+		target = mid;
 		yield return new WaitForSeconds (1f);
-		target = jumper;
+		target = end;
 		depthOffset = -0.7f;
 		gameController.waiting = true;
+		platformButton.SetActive (true);
+	}
+
+	public IEnumerator CameraPan(Transform end, float endDepth){
+		platformButton.SetActive (false);
+		gameController.waiting = false;
+		follow = true;
+		yield return new WaitForSeconds (0.05f);
+		target = end;
+		depthOffset = endDepth;
+		gameController.waiting = true;
+		platformButton.SetActive (true);
+	}
+
+	public void TogglePlatformView(){
+		Transform jumper = gameController.GetJumper().transform;
+		Transform landingSpot = gameController.GetLandingSpot().transform;
+		if (platformViewToggled) {
+			platformButtonLabel.text = "Show Platform";
+			//target = jumper;
+			StartCoroutine(CameraPan(jumper,-0.7f));
+			platformViewToggled = false;
+		} else {
+			platformButtonLabel.text = "Back to Jumper";
+			//target = landingSpot;
+			StartCoroutine(CameraPan(landingSpot,-8f));
+			platformViewToggled = true;
+		}
+	}
+
+	public void TogglePlatformButton(){
+		if (platformButton.activeSelf)
+			platformButton.SetActive (false);
+		else
+			platformButton.SetActive (true);
 	}
 }

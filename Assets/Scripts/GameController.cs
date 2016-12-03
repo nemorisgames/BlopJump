@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour
 	Camera cam;
 	MainController controller;
 	GameObject endRoundScreen;
+
 	[HideInInspector]
 	public bool endRoundScreenVisible;
 
@@ -23,8 +24,11 @@ public class GameController : MonoBehaviour
 	public int coinsPerFlip;
 	public int numCoins;
 	public float coinSpacing;
-	GameObject coinArea;
-	GameObject coin;
+
+	public GameObject coin;
+
+	int coinGrabHeight;
+	int airCoins;
 
 	[Header("Diver")]
 	public GameObject diverGameObject; //diver en uso
@@ -68,13 +72,15 @@ public class GameController : MonoBehaviour
 	Platform platformProps;
 	bool enableWind;
 	UILabel endRoundFlips;
-	UILabel endRoundCoins;
+	UILabel endRoundFlipCoins;
+	UILabel endRoundHeight;
+	UILabel endRoundHeightCoins;
 	UILabel endRoundJump;
 	LandingSpot landingSpot;
 	BoxCollider landingSpotBC;
-	//CapsuleCollider diverCollider;
 	public JumpBar jumpBar;
 	bool _canCountFlip = false;
+
 	[Header("Particles")]
 	public GameObject splashBlop;
 	public GameObject splashDiver;
@@ -91,16 +97,17 @@ public class GameController : MonoBehaviour
 		endRoundScreen.SetActive (false);
 		endRoundScreenVisible = false;
 		endRoundFlips = endRoundScreen.transform.FindChild ("EndFlips").GetComponent<UILabel> ();
-		endRoundCoins = endRoundScreen.transform.FindChild ("EndCoins").GetComponent<UILabel> ();
+		endRoundFlipCoins = endRoundScreen.transform.FindChild ("EndFlipCoins").GetComponent<UILabel> ();
+		endRoundHeight = endRoundScreen.transform.FindChild ("EndHeight").GetComponent<UILabel> ();
+		endRoundHeightCoins = endRoundScreen.transform.FindChild ("EndHeightCoins").GetComponent<UILabel> ();
 		endRoundJump = endRoundScreen.transform.FindChild ("EndRoundText").GetComponent<UILabel> ();
-		coinArea = GameObject.Find ("CoinArea");
-		coin = GameObject.Find ("Coin");
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
 		landingSpotBC = landingSpot.gameObject.GetComponent<BoxCollider> ();
 		jumpBar = GameObject.FindGameObjectWithTag ("JumpBar").GetComponent<JumpBar> ();
 		Setup ();
 
 		maxHeight = 0;
+		coinGrabHeight = 1;
 	}
 
 	void FixedUpdate()
@@ -154,6 +161,7 @@ public class GameController : MonoBehaviour
 
 			//Cleanup
 		}
+
 	}
 
 	void CalculateDistance(){
@@ -163,8 +171,21 @@ public class GameController : MonoBehaviour
 		controller.distanceLabel.text = "Distance: " + Mathf.FloorToInt(distance)+"m";
 	}
 
+	IEnumerator CreatePlusCoin(){
+		GameObject plus = (GameObject)Instantiate (coin, new Vector3 (diverRigidbody.position.x + 0.5f, diverRigidbody.position.y, diverRigidbody.position.z), coin.transform.rotation);
+		yield return new WaitForSeconds (1f);
+		Destroy (plus);
+	}
+
 	void LateUpdate()
 	{
+		if (Mathf.FloorToInt(diverRigidbody.position.y) >= coinGrabHeight) {
+			StartCoroutine (CreatePlusCoin ());
+			Debug.Log(Mathf.FloorToInt(diverRigidbody.position.y)+" "+coinGrabHeight);
+			airCoins += 2;
+			coinGrabHeight += 1;
+		}
+
 		if (diverRigidbody.position.y < -2) {
 			if (landingSpot.getLanding ())
 				goodJump = false;
@@ -317,6 +338,7 @@ public class GameController : MonoBehaviour
 		_canCountFlip = false;
 		SplashCleanup ();
 		maxHeight = 0;
+		coinGrabHeight = 1;
 	}
 
 	void DiverJump(Vector3 jumpForce)
@@ -345,7 +367,7 @@ public class GameController : MonoBehaviour
 		{
 			flips++;
 			_canCountFlip = false;
-			Debug.Log(flips);
+			//Debug.Log(flips);
 		}
 	}
 
@@ -384,13 +406,17 @@ public class GameController : MonoBehaviour
 
 	void AddFlipCoins(int flips){
 		endRoundFlips.text = "Flips: " + flips;
-		int coins = flips * coinsPerFlip;
+		endRoundHeight.text = "Height: " + Mathf.Floor (maxHeight * 10) / 10 + "m";
+		int flipCoins = flips * coinsPerFlip;
+		int heightCoins = Mathf.FloorToInt(maxHeight) * 2;
 		if (goodJump) {
-			controller.coins += coins;
-			endRoundCoins.text = "Coins: " + coins;
+			controller.coins += flipCoins + heightCoins;
+			endRoundFlipCoins.text = "+ " + flipCoins + " coins";
+			endRoundHeightCoins.text = "+ " + heightCoins + " coins";
 			endRoundJump.text = "Good Jump!";
 		} else {
-			endRoundCoins.text = "Coins: 0";
+			endRoundFlipCoins.text = "+ 0 coins";
+			endRoundHeightCoins.text = "+ 0 coins";
 			endRoundJump.text = "Bad Jump!";
 		}
 
@@ -401,11 +427,13 @@ public class GameController : MonoBehaviour
 		{
 			endRoundScreenVisible = false;
 			endRoundScreen.SetActive (false);
+			controller.EnableAd (false);
 		} 
 		else 
 		{
 			endRoundScreenVisible = true;
 			endRoundScreen.SetActive (true);
+			controller.EnableAd (true);
 			ResetPosition ();
 		}
 	}
@@ -460,8 +488,16 @@ public class GameController : MonoBehaviour
 		goodJump = b;
 	}
 
-	public GameObject ReturnDiver(){
+	public GameObject GetDiver(){
 		return diver;
+	}
+
+	public GameObject GetJumper(){
+		return jumper;
+	}
+
+	public GameObject GetLandingSpot(){
+		return landingSpot.gameObject;
 	}
 
 	public void JumperJump(){
@@ -469,6 +505,7 @@ public class GameController : MonoBehaviour
         jumper.GetComponent<CapsuleCollider>().enabled = false;
         jumper.GetComponent<Animator>().SetBool("onJump", true);
 		//ToggleJumpBar ();
+		cam.GetComponent<CameraController>().TogglePlatformButton();
 		controllingJumper = false;
 		waiting = false;
 		playing = true;
@@ -482,7 +519,7 @@ public class GameController : MonoBehaviour
 	public void SetLandingSpot(){
 		//Debug.Log (LandingSpotExtent ());
 		//Debug.Log (landingSpot.minDistance [jumperProps.index, platformProps.index] + " " + landingSpot.maxDistance [jumperProps.index, platformProps.index]);
-		float rand = Random.Range (landingSpot.maxDistance [jumperProps.index, platformProps.index], landingSpot.minDistance [jumperProps.index, platformProps.index] + LandingSpotExtent());
+		float rand = Random.Range (landingSpot.maxDistance [jumperProps.index, platformProps.index] - LandingSpotExtent(), landingSpot.minDistance [jumperProps.index, platformProps.index]);
 		landingSpot.transform.position = new Vector3 (rand, landingSpot.transform.position.y, landingSpot.transform.position.z);
 	}
 
