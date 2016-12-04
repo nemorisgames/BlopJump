@@ -261,7 +261,23 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.26164126
+        functionName: JumperAnimationEvents
+        data: Effort
+        objectReferenceParameter: {fileID: 11500000, guid: 5b0dafc6e65c3b84a96d5bfabfabca5d,
+          type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.32549012
+        functionName: JumperAnimationEvents
+        data: Jump
+        objectReferenceParameter: {fileID: 11500000, guid: 5b0dafc6e65c3b84a96d5bfabfabca5d,
+          type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask:
       - path: 
         weight: 1

@@ -82,9 +82,12 @@ public class GameController : MonoBehaviour
 	float maxHeight;
 	bool splash;
 
-    public AudioSource sourceSFX;
+    [Header("SFX")]
+    public AudioSource[] sourceSFX;
     public AudioClip[] waterSFX;
     public AudioClip[] blobSFX;
+    public AudioClip[] jumperSFX;
+
 	// Use this for initialization
 	void Awake () 
 	{
@@ -145,8 +148,8 @@ public class GameController : MonoBehaviour
 						DiverNormalSpin ();
 					}
 					if (diverRigidbody.position.y < 0.11 && !splash) {
-                        sourceSFX.clip = waterSFX[2];
-                        sourceSFX.Play();
+                        //sourceSFX.clip = waterSFX[2];
+                        //sourceSFX.Play();
 						Instantiate (splashDiver, diverRigidbody.transform.position, splashDiver.transform.rotation);
 						splash = true;
 					}
@@ -360,8 +363,8 @@ public class GameController : MonoBehaviour
 		{
             //sourceSFX.clip = waterSFX[4];
             //sourceSFX.Play();
-            sourceSFX.clip = blobSFX[0];
-            sourceSFX.Play();
+            //sourceSFX.clip = blobSFX[0];
+            //sourceSFX.Play();
 			Instantiate (splashBlop, splashBlop.transform.position, splashBlop.transform.rotation);
 			GetComponent<Animator>().SetBool("onAction", true);
 			controllingDiver = true;
@@ -474,8 +477,9 @@ public class GameController : MonoBehaviour
 	}
 
 	public void JumperJump(){
-		jumperRigidbody.AddForce (jumperJumpForce);
-        jumper.GetComponent<CapsuleCollider>().enabled = false;
+        
+		//jumperRigidbody.AddForce (jumperJumpForce);
+        //jumper.GetComponent<CapsuleCollider>().enabled = false;
         jumper.GetComponent<Animator>().SetBool("onJump", true);
 		//ToggleJumpBar ();
 		controllingJumper = false;
@@ -498,5 +502,36 @@ public class GameController : MonoBehaviour
 	public float LandingSpotExtent(){
 		return landingSpotBC.size.x/2;
 	}
-		
+
+    public void JumperEV(string str)
+    {
+        
+        //Debug.Log("Jumper: " + str);
+        if (str == "Effort")
+        {
+            //jumper effort clip
+            Debug.Log("Jumper: " + str);
+        }
+        if (str == "Jump")
+        {
+            jumperRigidbody.AddForce (jumperJumpForce);
+            jumper.GetComponent<CapsuleCollider>().enabled = false;
+        }
+
+        Debug.Log("Jumper: " + str);
+
+    }
+	
+    void PlaySFX(AudioClip clip)
+    {
+        for (int i = 0; i < sourceSFX.Length; i++)
+        {
+            if (!sourceSFX[i].isPlaying)
+            {
+                sourceSFX[i].clip = clip;
+                sourceSFX[i].Play();
+                break;
+            }
+        }
+    }
 }
