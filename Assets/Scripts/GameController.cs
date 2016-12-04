@@ -148,8 +148,7 @@ public class GameController : MonoBehaviour
 						DiverNormalSpin ();
 					}
 					if (diverRigidbody.position.y < 0.11 && !splash) {
-                        //sourceSFX.clip = waterSFX[2];
-                        //sourceSFX.Play();
+                        PlaySFX(waterSFX[2]);
 						Instantiate (splashDiver, diverRigidbody.transform.position, splashDiver.transform.rotation);
 						splash = true;
 					}
@@ -361,10 +360,10 @@ public class GameController : MonoBehaviour
 	{
 		if(other.tag == "Jumper")
 		{
-            //sourceSFX.clip = waterSFX[4];
-            //sourceSFX.Play();
-            //sourceSFX.clip = blobSFX[0];
-            //sourceSFX.Play();
+            PlaySFX(waterSFX[4]);
+
+            PlaySFX(blobSFX[0]);
+
 			Instantiate (splashBlop, splashBlop.transform.position, splashBlop.transform.rotation);
 			GetComponent<Animator>().SetBool("onAction", true);
 			controllingDiver = true;
@@ -509,8 +508,8 @@ public class GameController : MonoBehaviour
         //Debug.Log("Jumper: " + str);
         if (str == "Effort")
         {
-            //jumper effort clip
-            Debug.Log("Jumper: " + str);
+            int i = Mathf.RoundToInt(Random.Range(0, jumperSFX.Length));
+            PlaySFX(jumperSFX[i]);
         }
         if (str == "Jump")
         {

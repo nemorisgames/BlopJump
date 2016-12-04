@@ -228,9 +228,9 @@ public class MainController : MonoBehaviour
 	}
 
 	void LoadDefaults(){
-		diverKey = 0; //wetsuit diver
-		jumperKey = 7; //normal jumper
-		platformKey = 13; //metal platform
+		diverKey = 3; //wetsuit diver
+		jumperKey = 8; //normal jumper
+		platformKey = 11; //metal platform
 		Unlockable u;
 		if (unlockables.TryGetValue (diverKey, out u)) 
 		{
