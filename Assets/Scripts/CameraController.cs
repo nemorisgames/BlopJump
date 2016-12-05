@@ -93,6 +93,7 @@ public class CameraController : MonoBehaviour {
 		depthOffset = -0.7f;
 		gameController.waiting = true;
 		platformButton.SetActive (true);
+		gameController.jumpBar.Initialize ();
 	}
 
 	public IEnumerator CameraPan(Transform end, float endDepth){

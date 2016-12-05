@@ -24,6 +24,8 @@ public class MainController : MonoBehaviour
 	public GameObject[] containers;
 	public GameObject[] scrollViews;
 	public float boxDistance;
+	public GameObject rewardButton;
+	public GameObject inventoryButton;
 
 	[HideInInspector]
 	public int diverKey;
@@ -295,5 +297,10 @@ public class MainController : MonoBehaviour
 		diverKey = diverKeyAux;
 		jumperKey = jumperKeyAux;
 		platformKey = platformKeyAux;
+	}
+
+	public void ToggleButtons(bool b){
+		rewardButton.SetActive (b);
+		inventoryButton.SetActive (b);
 	}
 }

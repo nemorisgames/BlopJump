@@ -26,6 +26,7 @@ public class GameController : MonoBehaviour
 	public float coinSpacing;
 
 	public GameObject coin;
+	public CoinSpawner coinSpawner;
 
 	int coinGrabHeight;
 	int airCoins;
@@ -95,6 +96,7 @@ public class GameController : MonoBehaviour
     public AudioClip[] blobSFX;
     public AudioClip[] jumperSFX;
 
+
 	// Use this for initialization
 	void Awake () 
 	{
@@ -112,6 +114,7 @@ public class GameController : MonoBehaviour
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
 		landingSpotBC = landingSpot.gameObject.GetComponent<BoxCollider> ();
 		jumpBar = GameObject.FindGameObjectWithTag ("JumpBar").GetComponent<JumpBar> ();
+		jumpBar.gameObject.SetActive (false);
 		Setup ();
 
 		maxHeight = 0;
@@ -323,6 +326,7 @@ public class GameController : MonoBehaviour
 		jumperRigidbody.position = jumperPos;
 		splash = false;
 		cam.GetComponent<CameraController>().follow = false;
+		coinSpawner.Init ();
 	}
 
 	public void ResetRound() //reubica la cámara, muestra pantalla de fin de ronda
@@ -341,8 +345,7 @@ public class GameController : MonoBehaviour
 		CalculateDistance ();
 		//ToggleJumpBar ();
 		StartCoroutine (cam.GetComponent<CameraController> ().CameraPan(jumper.transform, diver.transform, landingSpot.transform));
-		jumpBar.gameObject.SetActive (true);
-		jumpBar.Initialize();
+		//jumpBar.Initialize();
 		playing = false;
 		_canCountFlip = false;
 		SplashCleanup ();
@@ -352,13 +355,14 @@ public class GameController : MonoBehaviour
 
 	void DiverJump(Vector3 jumpForce)
 	{
-		compensateWeightVertical = jumpBar.GetComponent<UISlider> ().value * 2;
+		//compensateWeightVertical = jumpBar.GetComponent<UISlider> ().value * 2;
+		compensateWeightVertical = 2;
 		float platformComp = 1 + platformProps.height * 0.1f;
 		float jumperWeightX = jumperProps.weight / compensateWeightHorizontal * platformComp;
 		float jumperWeightY = jumperProps.weight * compensateWeightVertical / (3 - platformComp);
 		Vector3 jump = new Vector3 (jumpForce.x + jumperWeightX - compensatePlatformHeight*platformProps.height, jumpForce.y + jumperWeightY + compensatePlatformHeight * platformProps.height, jumpForce.z);
 		Debug.Log (jump.x + " " + jump.y);
-		diverRigidbody.AddForce (jump);
+		diverRigidbody.AddForce (jump*jumpBar.GetComponent<UISlider>().value*1.1f);
 		jumpStart = Time.time;
 		cam.GetComponent<CameraController> ().target = diver.transform;
 		//cam.GetComponent<CameraController>().ChangeTargetV2(diver.transform);
@@ -427,10 +431,12 @@ public class GameController : MonoBehaviour
 			endRoundFlipCoins.text = "+ " + flipCoins + " coins";
 			endRoundHeightCoins.text = "+ " + heightCoins + " coins";
 			endRoundJump.text = "Good Jump!";
+			endRoundTotalCoins.text = "Total coins: " + (flipCoins + heightCoins);
 		} else {
 			endRoundFlipCoins.text = "+ 0 coins";
 			endRoundHeightCoins.text = "+ 0 coins";
 			endRoundJump.text = "Bad Jump!";
+			endRoundTotalCoins.text = "Total coins: 0";
 		}
 
 	}
@@ -444,6 +450,7 @@ public class GameController : MonoBehaviour
 		} 
 		else 
 		{
+			controller.ToggleButtons (true);
 			endRoundScreenVisible = true;
 			endRoundScreen.SetActive (true);
 			controller.EnableAd (true);
@@ -514,7 +521,7 @@ public class GameController : MonoBehaviour
 	}
 
 	public void JumperJump(){
-        
+		controller.ToggleButtons (false);
 		//jumperRigidbody.AddForce (jumperJumpForce);
         //jumper.GetComponent<CapsuleCollider>().enabled = false;
         jumper.GetComponent<Animator>().SetBool("onJump", true);
@@ -533,7 +540,7 @@ public class GameController : MonoBehaviour
 	public void SetLandingSpot(){
 		//Debug.Log (LandingSpotExtent ());
 		//Debug.Log (landingSpot.minDistance [jumperProps.index, platformProps.index] + " " + landingSpot.maxDistance [jumperProps.index, platformProps.index]);
-		float rand = Random.Range (landingSpot.maxDistance [jumperProps.index, platformProps.index] - LandingSpotExtent(), landingSpot.minDistance [jumperProps.index, platformProps.index]);
+		float rand = Random.Range (landingSpot.maxDistance [jumperProps.index, platformProps.index] - LandingSpotExtent()*1.5f, landingSpot.minDistance [jumperProps.index, platformProps.index]);
 		landingSpot.transform.position = new Vector3 (rand, landingSpot.transform.position.y, landingSpot.transform.position.z);
 	}
 
