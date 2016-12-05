@@ -76,6 +76,7 @@ public class GameController : MonoBehaviour
 	UILabel endRoundHeight;
 	UILabel endRoundHeightCoins;
 	UILabel endRoundJump;
+	UILabel endRoundTotalCoins;
 	LandingSpot landingSpot;
 	BoxCollider landingSpotBC;
 	public JumpBar jumpBar;
@@ -87,6 +88,12 @@ public class GameController : MonoBehaviour
 
 	float maxHeight;
 	bool splash;
+
+    [Header("SFX")]
+    public AudioSource[] sourceSFX;
+    public AudioClip[] waterSFX;
+    public AudioClip[] blobSFX;
+    public AudioClip[] jumperSFX;
 
 	// Use this for initialization
 	void Awake () 
@@ -100,6 +107,7 @@ public class GameController : MonoBehaviour
 		endRoundFlipCoins = endRoundScreen.transform.FindChild ("EndFlipCoins").GetComponent<UILabel> ();
 		endRoundHeight = endRoundScreen.transform.FindChild ("EndHeight").GetComponent<UILabel> ();
 		endRoundHeightCoins = endRoundScreen.transform.FindChild ("EndHeightCoins").GetComponent<UILabel> ();
+		endRoundTotalCoins = endRoundScreen.transform.FindChild ("EndTotalCoins").GetComponent<UILabel> ();
 		endRoundJump = endRoundScreen.transform.FindChild ("EndRoundText").GetComponent<UILabel> ();
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
 		landingSpotBC = landingSpot.gameObject.GetComponent<BoxCollider> ();
@@ -149,6 +157,7 @@ public class GameController : MonoBehaviour
 						DiverNormalSpin ();
 					}
 					if (diverRigidbody.position.y < 0.11 && !splash) {
+                        PlaySFX(waterSFX[2]);
 						Instantiate (splashDiver, diverRigidbody.transform.position, splashDiver.transform.rotation);
 						splash = true;
 					}
@@ -375,6 +384,10 @@ public class GameController : MonoBehaviour
 	{
 		if(other.tag == "Jumper")
 		{
+            PlaySFX(waterSFX[4]);
+
+            PlaySFX(blobSFX[0]);
+
 			Instantiate (splashBlop, splashBlop.transform.position, splashBlop.transform.rotation);
 			GetComponent<Animator>().SetBool("onAction", true);
 			controllingDiver = true;
@@ -501,8 +514,9 @@ public class GameController : MonoBehaviour
 	}
 
 	public void JumperJump(){
-		jumperRigidbody.AddForce (jumperJumpForce);
-        jumper.GetComponent<CapsuleCollider>().enabled = false;
+        
+		//jumperRigidbody.AddForce (jumperJumpForce);
+        //jumper.GetComponent<CapsuleCollider>().enabled = false;
         jumper.GetComponent<Animator>().SetBool("onJump", true);
 		//ToggleJumpBar ();
 		cam.GetComponent<CameraController>().TogglePlatformButton();
@@ -526,5 +540,36 @@ public class GameController : MonoBehaviour
 	public float LandingSpotExtent(){
 		return landingSpotBC.size.x/2;
 	}
-		
+
+    public void JumperEV(string str)
+    {
+        
+        //Debug.Log("Jumper: " + str);
+        if (str == "Effort")
+        {
+            int i = Mathf.RoundToInt(Random.Range(0, jumperSFX.Length));
+            PlaySFX(jumperSFX[i]);
+        }
+        if (str == "Jump")
+        {
+            jumperRigidbody.AddForce (jumperJumpForce);
+            jumper.GetComponent<CapsuleCollider>().enabled = false;
+        }
+
+        Debug.Log("Jumper: " + str);
+
+    }
+	
+    void PlaySFX(AudioClip clip)
+    {
+        for (int i = 0; i < sourceSFX.Length; i++)
+        {
+            if (!sourceSFX[i].isPlaying)
+            {
+                sourceSFX[i].clip = clip;
+                sourceSFX[i].Play();
+                break;
+            }
+        }
+    }
 }
