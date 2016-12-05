@@ -24,6 +24,8 @@ public class MainController : MonoBehaviour
 	public GameObject[] containers;
 	public GameObject[] scrollViews;
 	public float boxDistance;
+	public GameObject rewardButton;
+	public GameObject inventoryButton;
 
 	[HideInInspector]
 	public int diverKey;
@@ -42,6 +44,10 @@ public class MainController : MonoBehaviour
 	GameObject distance;
 	//TweenAlpha distanceTween;
 
+	[Header("Ads")]
+	public GameObject ad;
+	public SpilGamesAPI spilAPI;
+
 	// Use this for initialization
 	void Awake () 
 	{
@@ -59,6 +65,7 @@ public class MainController : MonoBehaviour
 		distanceLabel = distance.GetComponent<UILabel> ();
 		//distanceTween = distance.GetComponent<TweenAlpha> ();
 		selectScreen.SetActive (false);
+		EnableAd (false);
 	}
 
 	/*void Start(){
@@ -124,6 +131,13 @@ public class MainController : MonoBehaviour
 			PlayerPrefs.SetInt (p.name, 0);
 			count++;
 		};
+	}
+
+	public void EnableAd(bool b){
+		if (b) {
+			spilAPI.GameBreak ();
+		}
+		ad.SetActive (b);
 	}
 
 	public void ToggleSelectScreen(){
@@ -256,7 +270,9 @@ public class MainController : MonoBehaviour
 			}
 		} else if (rewardMachine.rewardScreenVisible) {
 			rewardMachine.ToggleRewardScreen ();
-			gameController.ResetRound ();
+			if (gameController.controllingDiver) {
+				gameController.ResetRound ();
+			}
 		} else if (gameController.endRoundScreenVisible) {
 			gameController.ToggleEndRoundScreen ();
 			gameController.ResetRound ();
@@ -281,5 +297,10 @@ public class MainController : MonoBehaviour
 		diverKey = diverKeyAux;
 		jumperKey = jumperKeyAux;
 		platformKey = platformKeyAux;
+	}
+
+	public void ToggleButtons(bool b){
+		rewardButton.SetActive (b);
+		inventoryButton.SetActive (b);
 	}
 }

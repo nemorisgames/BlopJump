@@ -15,8 +15,8 @@ public class JumpBar : MonoBehaviour {
 	void Awake () {
 		jumpBar = GetComponent<UISlider> ();
 		jumpBarFill = transform.FindChild ("JumpBarFill").GetComponent<UISprite>();
-		baseColor = jumpBarFill.color;
-		targetColor = Color.red;
+		baseColor = Color.red;
+		targetColor = jumpBarFill.color;
 	}
 	
 	// Update is called once per frame
@@ -26,6 +26,7 @@ public class JumpBar : MonoBehaviour {
 
 	public void Initialize()
 	{
+		jumpBar.gameObject.SetActive (true);
 		//jumpBarForward = true;
 		jumpBar.value = 0;
 	}

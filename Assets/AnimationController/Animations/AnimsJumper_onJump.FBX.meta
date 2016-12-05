@@ -270,7 +270,7 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.32549012
+      - time: 0.31191546
         functionName: JumperAnimationEvents
         data: Jump
         objectReferenceParameter: {fileID: 11500000, guid: 5b0dafc6e65c3b84a96d5bfabfabca5d,
