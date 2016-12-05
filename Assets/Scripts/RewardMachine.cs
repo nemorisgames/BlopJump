@@ -139,6 +139,7 @@ public class RewardMachine : MonoBehaviour {
 				controller.gameController.waiting = true;
 				rewardScreen.SetActive (false);
 				rewardScreenVisible = false;
+				controller.EnableAd (false);
 			} else {
 				gameController.jumpBar.Initialize ();
 				UpdateCoins ();
@@ -148,6 +149,7 @@ public class RewardMachine : MonoBehaviour {
 				controller.gameController.waiting = false;
 				rewardScreen.SetActive (true);
 				rewardScreenVisible = true;
+				controller.EnableAd (true);
 			}
 		}
 	}
