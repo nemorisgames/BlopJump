@@ -15,8 +15,8 @@ public class CameraController : MonoBehaviour {
 	public float initialDepth;
 	[HideInInspector]
 	public bool follow;
-	float dampTime = 0.15f;
-	float moveSpeed = 0.4f;
+	float dampTime = 0.22f;
+	float moveSpeed = 0.2f;
 	float slow = 0.001f;
 	Vector3 velocity = Vector3.zero;
 	Camera cam;
