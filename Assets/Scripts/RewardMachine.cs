@@ -128,6 +128,9 @@ public class RewardMachine : MonoBehaviour {
 	public void ToggleRewardScreen()
 	{
 		if (!gameController.playing || gameController.controllingJumper) {
+			if (rewardScreenVisible && gameController.controllingDiver) {
+				gameController.ResetRound ();
+			}
 			if (controller.selectScreenVisible) {
 				controller.ToggleSelectScreen ();
 				controller.LastLoadout ();

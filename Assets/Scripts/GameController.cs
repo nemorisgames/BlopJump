@@ -455,6 +455,7 @@ public class GameController : MonoBehaviour
 			endRoundScreen.SetActive (true);
 			controller.EnableAd (true);
 			ResetPosition ();
+			StartCoroutine (controller.enableRestart ());
 		}
 	}
 

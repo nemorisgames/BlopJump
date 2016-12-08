@@ -44,6 +44,8 @@ public class MainController : MonoBehaviour
 	GameObject distance;
 	//TweenAlpha distanceTween;
 
+	bool restartAllowed = false;
+
 	[Header("Ads")]
 	public GameObject ad;
 	public SpilGamesAPI spilAPI;
@@ -103,7 +105,7 @@ public class MainController : MonoBehaviour
 	}
 
 	void LateUpdate(){
-		coinsLabel.text = "Coins: " + coins;
+		coinsLabel.text = ""+coins;
 	}
 
 	//carga datos de las listas expuestas en el inspector a los diccionarios
@@ -142,6 +144,10 @@ public class MainController : MonoBehaviour
 
 	public void ToggleSelectScreen(){
 		if (!gameController.playing || gameController.controllingJumper) {
+			if (selectScreenVisible && gameController.controllingDiver) {
+				gameController.ResetRound ();
+			}
+
 			if (rewardMachine.rewardScreenVisible) {
 				rewardMachine.ToggleRewardScreen ();
 			}
@@ -262,29 +268,30 @@ public class MainController : MonoBehaviour
 
 	public void CloseWindow()
 	{
-		if (selectScreenVisible) {
-			ToggleSelectScreen ();
-			LastLoadout ();
-			if (gameController.controllingDiver) {
+		if (restartAllowed) {
+			if (selectScreenVisible) {
+				ToggleSelectScreen ();
+				LastLoadout ();
+				if (gameController.controllingDiver) {
+					gameController.ResetRound ();
+				}
+			} else if (rewardMachine.rewardScreenVisible) {
+				rewardMachine.ToggleRewardScreen ();
+				if (gameController.controllingDiver) {
+					gameController.ResetRound ();
+				}
+			} else if (gameController.endRoundScreenVisible) {
+				gameController.ToggleEndRoundScreen ();
 				gameController.ResetRound ();
+				restartAllowed = false;
 			}
-		} else if (rewardMachine.rewardScreenVisible) {
-			rewardMachine.ToggleRewardScreen ();
-			if (gameController.controllingDiver) {
-				gameController.ResetRound ();
-			}
-		} else if (gameController.endRoundScreenVisible) {
-			gameController.ToggleEndRoundScreen ();
-			gameController.ResetRound ();
 		}
 	}
 
-	/*public IEnumerator PlusCoin(int value){
-		plusCoinLabel.text = "+" + value;
-		plusCoinTween.Toggle ();
-		yield return new WaitForSeconds (1.2f);
-		plusCoinTween.Toggle ();
-	}*/
+	public IEnumerator enableRestart(){
+		yield return new WaitForSeconds (1);
+		restartAllowed = true;
+	}
 
 	void UnlockAll(){ //for testing purposes only
 		foreach(KeyValuePair<int,Unlockable> u in unlockables){
