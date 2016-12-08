@@ -30,7 +30,7 @@ public class RewardMachine : MonoBehaviour {
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController> ();
 		gameController = GameObject.FindGameObjectWithTag ("Blop").GetComponent<GameController> ();
 		//availableRewards = new Dictionary<int,Unlockable> ();
-		rewardScreen.SetActive (false);
+		//rewardScreen.SetActive (false);
 		infoLabel = rewardScreen.transform.FindChild ("Info").GetComponent<UILabel> ();
 		rewardBoxLabel = rewardScreen.transform.FindChild ("RewardItem").transform.FindChild ("Label").GetComponent<UILabel> ();
 		rewardBox = rewardScreen.transform.FindChild ("RewardItem").transform.FindChild ("Checked").GetComponent<UISprite> ();
@@ -73,6 +73,7 @@ public class RewardMachine : MonoBehaviour {
 			key = GetRandom ();
 			if (controller.unlockables.TryGetValue (key, out u)) {
 				rewardBoxLabel.text = u.name;
+				rewardBox.spriteName = u.gameObject.name;
 			}
 			if(i == length-1)
 				UnlockItem (u, key);
@@ -140,7 +141,8 @@ public class RewardMachine : MonoBehaviour {
 			}
 			if (rewardScreenVisible) {
 				controller.gameController.waiting = true;
-				rewardScreen.SetActive (false);
+				rewardScreen.GetComponent<TweenAlpha>().PlayReverse();
+				//rewardScreen.SetActive (false);
 				rewardScreenVisible = false;
 				controller.EnableAd (false);
 			} else {
@@ -148,9 +150,11 @@ public class RewardMachine : MonoBehaviour {
 				UpdateCoins ();
 				infoLabel.text = "";
 				rewardBoxLabel.text = "???";
+				rewardBox.spriteName = "";
 				rewardButtonLabel.text = "Get Reward (" + tierCost [currentTier] + " coins)";
 				controller.gameController.waiting = false;
-				rewardScreen.SetActive (true);
+				//rewardScreen.SetActive (true);
+				rewardScreen.GetComponent<TweenAlpha>().PlayForward();
 				rewardScreenVisible = true;
 				controller.EnableAd (true);
 			}

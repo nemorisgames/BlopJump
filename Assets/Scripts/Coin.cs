@@ -10,11 +10,12 @@ public class Coin : MonoBehaviour {
 	void Awake(){
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController>();
         t = GetComponent<Transform>();
+		t.Rotate(Vector3.forward * 90);
 	}
 
     void Update()
     {
-        t.Rotate(Vector3.right * 50  * Time.deltaTime);
+        t.Rotate(Vector3.right * 100  * Time.deltaTime);
     }
 	
 	void OnTriggerEnter(Collider other){

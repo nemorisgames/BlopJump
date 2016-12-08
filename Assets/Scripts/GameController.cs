@@ -103,7 +103,7 @@ public class GameController : MonoBehaviour
 		cam = Camera.main;
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController> ();
 		endRoundScreen = GameObject.Find ("EndRoundScreen");
-		endRoundScreen.SetActive (false);
+		//endRoundScreen.SetActive (false);
 		endRoundScreenVisible = false;
 		endRoundFlips = endRoundScreen.transform.FindChild ("EndFlips").GetComponent<UILabel> ();
 		endRoundFlipCoins = endRoundScreen.transform.FindChild ("EndFlipCoins").GetComponent<UILabel> ();
@@ -180,7 +180,7 @@ public class GameController : MonoBehaviour
 		float distance = (diverRigidbody.position.x - landingSpot.transform.position.x);
 		if (distance < 0)
 			distance = 0;
-		controller.distanceLabel.text = "Distance: " + Mathf.FloorToInt(distance)+"m";
+		controller.distanceLabel.text = "" + Mathf.FloorToInt(distance)+"m";
 	}
 
 	IEnumerator CreatePlusCoin(){
@@ -445,14 +445,16 @@ public class GameController : MonoBehaviour
 		if (endRoundScreenVisible) 
 		{
 			endRoundScreenVisible = false;
-			endRoundScreen.SetActive (false);
+			//endRoundScreen.SetActive (false);
+			endRoundScreen.GetComponent<TweenAlpha>().PlayReverse();
 			controller.EnableAd (false);
 		} 
 		else 
 		{
 			controller.ToggleButtons (true);
 			endRoundScreenVisible = true;
-			endRoundScreen.SetActive (true);
+			endRoundScreen.GetComponent<TweenAlpha>().PlayForward();
+			//endRoundScreen.SetActive (true);
 			controller.EnableAd (true);
 			ResetPosition ();
 			StartCoroutine (controller.enableRestart ());
@@ -522,15 +524,19 @@ public class GameController : MonoBehaviour
 	}
 
 	public void JumperJump(){
-		controller.ToggleButtons (false);
-		//jumperRigidbody.AddForce (jumperJumpForce);
-        //jumper.GetComponent<CapsuleCollider>().enabled = false;
-        jumper.GetComponent<Animator>().SetBool("onJump", true);
-		//ToggleJumpBar ();
-		cam.GetComponent<CameraController>().TogglePlatformButton();
-		controllingJumper = false;
-		waiting = false;
-		playing = true;
+		if (controller.tutorialScreen.value > 0f) {
+			controller.tutorialScreen.PlayReverse ();
+		} else {
+			controller.ToggleButtons (false);
+			//jumperRigidbody.AddForce (jumperJumpForce);
+			//jumper.GetComponent<CapsuleCollider>().enabled = false;
+			jumper.GetComponent<Animator> ().SetBool ("onJump", true);
+			//ToggleJumpBar ();
+			cam.GetComponent<CameraController> ().TogglePlatformButton ();
+			controllingJumper = false;
+			waiting = false;
+			playing = true;
+		}
 	}
 
 	IEnumerator DiverJumpDelay(){

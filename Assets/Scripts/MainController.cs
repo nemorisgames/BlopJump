@@ -19,6 +19,7 @@ public class MainController : MonoBehaviour
 	public List<Platform> platformList; //para agregar prefabs desde el inspector
 	public RewardMachine rewardMachine;
 	public GameController gameController;
+	public TweenAlpha tutorialScreen;
 	public GameObject selectScreen;
 	public GameObject selectScreenBox;
 	public GameObject[] containers;
@@ -66,7 +67,7 @@ public class MainController : MonoBehaviour
 		distance = GameObject.Find ("Distance");
 		distanceLabel = distance.GetComponent<UILabel> ();
 		//distanceTween = distance.GetComponent<TweenAlpha> ();
-		selectScreen.SetActive (false);
+		//selectScreen.SetActive (false);
 		EnableAd (false);
 	}
 
@@ -122,6 +123,7 @@ public class MainController : MonoBehaviour
 		foreach (Jumper j in jumperList) 
 		{
 			j.unlocked = false;
+			print (j);
 			unlockables.Add (count,j);
 			PlayerPrefs.SetInt (j.name, 0);
 			count++;
@@ -162,7 +164,8 @@ public class MainController : MonoBehaviour
 					containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
 				}
 				gameController.waiting = true;
-				selectScreen.SetActive (false);
+				//selectScreen.SetActive (false);
+				selectScreen.GetComponent<TweenAlpha>().PlayReverse();
 				selectScreenVisible = false;
 			} else {
 				gameController.waiting = false;
@@ -180,7 +183,7 @@ public class MainController : MonoBehaviour
 							box.name = u.Key.ToString ();
 							box.tag = "Diver";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Diver> ().name;
-
+							box.transform.FindChild("Checked").GetComponent<UISprite>().spriteName = u.Value.gameObject.name;
 							box.transform.localPosition = new Vector3 (diverAux, box.transform.position.y, box.transform.position.z);
 							box.GetComponent<UIToggle> ().group = 1;
 							diverAux += boxDistance;
@@ -194,6 +197,7 @@ public class MainController : MonoBehaviour
 							box.name = u.Key.ToString ();
 							box.tag = "Jumper";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Jumper> ().name;
+							box.transform.FindChild("Checked").GetComponent<UISprite>().spriteName = u.Value.gameObject.name;
 							box.GetComponent<UIDragScrollView> ().scrollView = GetComponentInParent<UIScrollView> ();
 							box.transform.localPosition = new Vector3 (jumperAux, box.transform.position.y, box.transform.position.z);
 							box.GetComponent<UIToggle> ().group = 2;
@@ -207,6 +211,7 @@ public class MainController : MonoBehaviour
 							box.name = u.Key.ToString ();
 							box.tag = "Platform";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Platform> ().name;
+							box.transform.FindChild("Checked").GetComponent<UISprite>().spriteName = u.Value.gameObject.name;
 							box.GetComponent<UIDragScrollView> ().scrollView = GetComponentInParent<UIScrollView> ();
 							box.transform.localPosition = new Vector3 (platformAux, box.transform.position.y, box.transform.position.z);
 							box.GetComponent<UIToggle> ().group = 3;
@@ -221,7 +226,8 @@ public class MainController : MonoBehaviour
 				for (int i = 0; i < 3; i++) {
 					containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
 				}
-				selectScreen.SetActive (true);
+				//selectScreen.SetActive (true);
+				selectScreen.GetComponent<TweenAlpha>().PlayForward();
 				selectScreenVisible = true;
 			}
 		}

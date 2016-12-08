@@ -11,6 +11,8 @@ public class CoinSpawner : MonoBehaviour {
     private int _slots;
     private int _currentCoins;
 
+	ArrayList allCoins = new ArrayList();
+
 	void Start () {
         t = GetComponent<Transform>();
 
@@ -19,11 +21,15 @@ public class CoinSpawner : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+
 	}
 
     public void Init()
     {
+		for (int i = 0; i < allCoins.Count; i++) {
+			Destroy ((GameObject)allCoins [i]);
+		}
+		allCoins = new ArrayList ();
         _currentCoins = 0;
         _slots = coinsNumber + Mathf.RoundToInt(coinsNumber / 2);
         _coins = new int[_slots];
@@ -41,7 +47,8 @@ public class CoinSpawner : MonoBehaviour {
                 if (((j <= 6) && (_currentCoins != coinsNumber)) && (_coins[i] == 0))
                 {
                     _coins[i] = 1;
-                    Instantiate(coinsPrefab, new Vector3(this.t.position.x, i*separation, this.t.position.z), Quaternion.identity, this.t);
+					GameObject g = (GameObject)Instantiate(coinsPrefab, new Vector3(this.t.position.x, i*separation, this.t.position.z), Quaternion.identity, this.t);
+					allCoins.Add (g);
                     _currentCoins++;
                 }
             }
