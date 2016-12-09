@@ -19,7 +19,7 @@ public class Coin : MonoBehaviour {
     }
 	
 	void OnTriggerEnter(Collider other){
-		if (other.tag == "Diver") {
+		if (other.tag == "Diver" || other.tag == "Foot" || other.tag == "Arm") {
 			controller.coins += value;
 			//StartCoroutine (controller.PlusCoin (value));
 			Destroy (this.gameObject);

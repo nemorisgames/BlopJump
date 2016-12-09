@@ -38,7 +38,7 @@ public class MainController : MonoBehaviour
 	int jumperKeyAux;
 	int platformKeyAux;
 
-	[HideInInspector]
+	//[HideInInspector]
 	public bool selectScreenVisible = false;
 	UILabel coinsLabel;
 	public UILabel distanceLabel;
@@ -69,6 +69,8 @@ public class MainController : MonoBehaviour
 		//distanceTween = distance.GetComponent<TweenAlpha> ();
 		//selectScreen.SetActive (false);
 		EnableAd (false);
+		ToggleButtons (true);
+		rewardButton.SetActive (false);
 	}
 
 	/*void Start(){
@@ -99,7 +101,7 @@ public class MainController : MonoBehaviour
 
 			if (Input.GetKeyDown (KeyCode.U) && !selectScreenVisible && !rewardMachine.rewardScreenVisible) 
 			{
-				UnlockAll ();
+				UnlockAll (true);
 				Debug.Log ("cheater!");
 			};
 		}
@@ -115,24 +117,46 @@ public class MainController : MonoBehaviour
 		int count = 0;
 		foreach (Diver d in diverList) 
 		{
+			if (PlayerPrefs.GetInt (d.name) != 1) {
+				d.unlocked = false;
+				PlayerPrefs.SetInt (d.name, 0);
+			} else {
+				d.unlocked = true;
+			}
+			unlockables.Add (count, d);
+			/*
 			d.unlocked = false;
 			unlockables.Add (count, d);
 			PlayerPrefs.SetInt (d.name, 0);
+			 */
 			count++;
 		};
 		foreach (Jumper j in jumperList) 
 		{
-			j.unlocked = false;
-			print (j);
+			if (PlayerPrefs.GetInt (j.name) != 1) {
+				j.unlocked = false;
+				PlayerPrefs.SetInt (j.name, 0);
+			} else {
+				j.unlocked = true;
+			}
 			unlockables.Add (count,j);
-			PlayerPrefs.SetInt (j.name, 0);
+			/*j.unlocked = false;
+			unlockables.Add (count,j);
+			PlayerPrefs.SetInt (j.name, 0);*/
 			count++;
 		};
 		foreach (Platform p in platformList) 
 		{
-			p.unlocked = false;
+			if (PlayerPrefs.GetInt (p.name) != 1) {
+				p.unlocked = false;
+				PlayerPrefs.SetInt (p.name, 0);
+			} else {
+				p.unlocked = true;
+			}
+			unlockables.Add (count, p);
+			/*p.unlocked = false;
 			unlockables.Add (count,p);
-			PlayerPrefs.SetInt (p.name, 0);
+			PlayerPrefs.SetInt (p.name, 0);*/
 			count++;
 		};
 	}
@@ -146,17 +170,8 @@ public class MainController : MonoBehaviour
 
 	public void ToggleSelectScreen(){
 		if (!gameController.playing || gameController.controllingJumper) {
-			if (selectScreenVisible && gameController.controllingDiver) {
-				gameController.ResetRound ();
-			}
-
-			if (rewardMachine.rewardScreenVisible) {
-				rewardMachine.ToggleRewardScreen ();
-			}
-			if (gameController.endRoundScreenVisible) {
-				gameController.ToggleEndRoundScreen ();
-			}
 			if (selectScreenVisible) {
+				// si esta visible -> cerrar pantalla, chequear si las otras estan cerradas
 				for (int i = 0; i < 3; i++) {
 					foreach (Transform t in scrollViews[i].transform) {
 						GameObject.Destroy (t.gameObject);
@@ -167,9 +182,24 @@ public class MainController : MonoBehaviour
 				//selectScreen.SetActive (false);
 				selectScreen.GetComponent<TweenAlpha>().PlayReverse();
 				selectScreenVisible = false;
+
 			} else {
+				//si no esta visible -> cerrar otras pantallas, abrir esta
+
+				if(tutorialScreen.value > 0f)
+					tutorialScreen.PlayReverse ();
+
+				if (rewardMachine.rewardScreenVisible) {
+					rewardMachine.ToggleRewardScreen ();
+				}
+
+				if (gameController.endRoundScreenVisible) {
+					gameController.ToggleEndRoundScreen ();
+				}
+					
+
 				gameController.waiting = false;
-				gameController.jumpBar.Initialize ();
+				//gameController.jumpBar.Initialize ();
 				float diverAux = -210;
 				float jumperAux = -210;
 				float platformAux = -210;
@@ -230,6 +260,7 @@ public class MainController : MonoBehaviour
 				selectScreen.GetComponent<TweenAlpha>().PlayForward();
 				selectScreenVisible = true;
 			}
+
 		}
 	}
 
@@ -248,12 +279,13 @@ public class MainController : MonoBehaviour
 		{
 			gameController.platformGameObject = u.gameObject;
 		}
-		gameController.ResetPosition ();
+		gameController.EndRound ();
 		gameController.Setup ();
+		gameController.ResetRound ();
 		ToggleSelectScreen ();
 	}
 
-	void LoadDefaults(){
+	public void LoadDefaults(){
 		diverKey = 3; //wetsuit diver
 		jumperKey = 8; //normal jumper
 		platformKey = 11; //metal platform
@@ -261,14 +293,24 @@ public class MainController : MonoBehaviour
 		if (unlockables.TryGetValue (diverKey, out u)) 
 		{
 			u.unlocked = true;
+			PlayerPrefs.SetInt (u.name, 1);
 		}
 		if (unlockables.TryGetValue (jumperKey, out u)) 
 		{
 			u.unlocked = true;
+			PlayerPrefs.SetInt (u.name, 1);
 		}
 		if (unlockables.TryGetValue (platformKey, out u)) 
 		{
 			u.unlocked = true;
+			PlayerPrefs.SetInt (u.name, 1);
+		}
+	}
+
+	public void CheckOpenScreens(){
+		if (!selectScreenVisible && !rewardMachine.rewardScreenVisible && gameController.controllingDiver) {
+			gameController.ResetRound ();
+			gameController.jumpBar.Initialize ();
 		}
 	}
 
@@ -299,9 +341,9 @@ public class MainController : MonoBehaviour
 		restartAllowed = true;
 	}
 
-	void UnlockAll(){ //for testing purposes only
+	public void UnlockAll(bool b){ //for testing purposes only
 		foreach(KeyValuePair<int,Unlockable> u in unlockables){
-			u.Value.unlocked = true;
+			u.Value.unlocked = b;
 		};
 		rewardMachine.availableRewards.Clear ();
 	}

@@ -8,6 +8,7 @@ public class InputController : MonoBehaviour {
 	GameController gameController;
 	CameraController cameraController;
 
+
 	// Use this for initialization
 	void Start () {
 		button = GetComponent<UIButton> ();
@@ -17,6 +18,12 @@ public class InputController : MonoBehaviour {
 	}
 
 	public void Clicked(){
+		if (controller.tutorialScreen.value > 0f) {
+			controller.tutorialScreen.PlayReverse ();
+			//gameController.Setup ();
+			gameController.ResetRound ();
+			controller.ToggleButtons (false);
+		} 
 		if (gameController.waiting && gameController.controllingJumper && !gameController.controllingDiver) {
 			if (cameraController.target == gameController.GetJumper ().transform) {
 				gameController.JumperJump ();

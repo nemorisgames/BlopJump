@@ -17,7 +17,7 @@ public class GameController : MonoBehaviour
 	[HideInInspector]
 	public bool playing = false;
 	[HideInInspector]
-	public bool waiting = true;
+	public bool waiting = false;
 
 	public float windForce;
 	public float jumpHeightCompensate;
@@ -191,16 +191,17 @@ public class GameController : MonoBehaviour
 
 	void LateUpdate()
 	{
-		if (Mathf.FloorToInt(diverRigidbody.position.y) >= coinGrabHeight) {
+		if (Mathf.FloorToInt(diverRigidbody.position.y) >= coinGrabHeight && playing) {
 			StartCoroutine (CreatePlusCoin ());
 			Debug.Log(Mathf.FloorToInt(diverRigidbody.position.y)+" "+coinGrabHeight);
 			airCoins += 2;
 			coinGrabHeight += 1;
 		}
 
-		if (diverRigidbody.position.y < -2) {
+		if (diverRigidbody.position.y < -2 && playing) {
 			if (landingSpot.getLanding ())
 				goodJump = false;
+			EndRound ();
 			ToggleEndRoundScreen ();
 			//ResetRound ();
 		}
@@ -252,11 +253,11 @@ public class GameController : MonoBehaviour
 		controllingJumper = true;
 		cam.GetComponent<CameraController> ().target = jumper.transform;
 		cam.GetComponent<CameraController> ().UpdateCamera (platformProps);
-		jumperJumpForce = new Vector3 (platformProps.jumpForceX, jumperJumpForce.y, jumperJumpForce.z);
+		//jumperJumpForce = new Vector3 (platformProps.jumpForceX, jumperJumpForce.y, jumperJumpForce.z);
 		//cam.gameObject.GetComponent<GenericMoveCamera> ().LookAtTarget = diver;
 
+		waiting = true;
 		//GenerateCoins (numCoins);
-		ResetRound ();
 	}
 
 	void SetDiverSpinSpeed(float normalSpin, float trickSpin)
@@ -296,7 +297,9 @@ public class GameController : MonoBehaviour
 	}
 
 
-	public void ResetPosition(){
+	public void EndRound(){
+		//ToggleEndRoundScreen ();
+
 		GetComponent<Animator> ().SetBool ("onAction", false);
 		jumpBar.gameObject.SetActive (false);
 		playing = false;
@@ -319,14 +322,17 @@ public class GameController : MonoBehaviour
 		Debug.Log ("x: "+diverRigidbody.position.x + ", y: "+maxHeight);
 		Debug.Log ("Time: "+(jumpEnd - jumpStart));
 
+		splash = false;
+		cam.GetComponent<CameraController>().follow = false;
+		coinSpawner.Init ();
+	}
+
+	public void ResetPosition (){
 		diverRigidbody.velocity = Vector3.zero;
 		diverRigidbody.angularVelocity = Vector3.zero;
 		diverRigidbody.rotation = diverPos.rotation;
 		diverRigidbody.position = diverPos.position;
 		jumperRigidbody.position = jumperPos;
-		splash = false;
-		cam.GetComponent<CameraController>().follow = false;
-		coinSpawner.Init ();
 	}
 
 	public void ResetRound() //reubica la cámara, muestra pantalla de fin de ronda
@@ -362,7 +368,11 @@ public class GameController : MonoBehaviour
 		float jumperWeightY = jumperProps.weight * compensateWeightVertical / (3 - platformComp);
 		Vector3 jump = new Vector3 (jumpForce.x + jumperWeightX - compensatePlatformHeight*platformProps.height, jumpForce.y + jumperWeightY + compensatePlatformHeight * platformProps.height, jumpForce.z);
 		Debug.Log (jump.x + " " + jump.y);
-		diverRigidbody.AddForce (jump*jumpBar.GetComponent<UISlider>().value*1.1f);
+		float jumpBarVal = jumpBar.GetComponent<UISlider> ().value;
+		if (jumpBarVal < 0.05f) {
+			jumpBarVal = 0.05f;
+		}
+		diverRigidbody.AddForce (jump*jumpBarVal*1.1f);
 		jumpStart = Time.time;
 		cam.GetComponent<CameraController> ().target = diver.transform;
 		//cam.GetComponent<CameraController>().ChangeTargetV2(diver.transform);
@@ -448,6 +458,7 @@ public class GameController : MonoBehaviour
 			//endRoundScreen.SetActive (false);
 			endRoundScreen.GetComponent<TweenAlpha>().PlayReverse();
 			controller.EnableAd (false);
+			ResetPosition ();
 		} 
 		else 
 		{
@@ -456,7 +467,7 @@ public class GameController : MonoBehaviour
 			endRoundScreen.GetComponent<TweenAlpha>().PlayForward();
 			//endRoundScreen.SetActive (true);
 			controller.EnableAd (true);
-			ResetPosition ();
+			//EndRound ();
 			StartCoroutine (controller.enableRestart ());
 		}
 	}
@@ -524,19 +535,14 @@ public class GameController : MonoBehaviour
 	}
 
 	public void JumperJump(){
-		if (controller.tutorialScreen.value > 0f) {
-			controller.tutorialScreen.PlayReverse ();
-		} else {
-			controller.ToggleButtons (false);
-			//jumperRigidbody.AddForce (jumperJumpForce);
-			//jumper.GetComponent<CapsuleCollider>().enabled = false;
-			jumper.GetComponent<Animator> ().SetBool ("onJump", true);
-			//ToggleJumpBar ();
-			cam.GetComponent<CameraController> ().TogglePlatformButton ();
-			controllingJumper = false;
-			waiting = false;
-			playing = true;
-		}
+		//jumperRigidbody.AddForce (jumperJumpForce);
+		//jumper.GetComponent<CapsuleCollider>().enabled = false;
+		jumper.GetComponent<Animator> ().SetBool ("onJump", true);
+		//ToggleJumpBar ();
+		cam.GetComponent<CameraController> ().TogglePlatformButton ();
+		controllingJumper = false;
+		waiting = false;
+		playing = true;
 	}
 
 	IEnumerator DiverJumpDelay(){

@@ -94,6 +94,7 @@ public class CameraController : MonoBehaviour {
 		gameController.waiting = true;
 		platformButton.SetActive (true);
 		gameController.jumpBar.Initialize ();
+		controller.ToggleButtons (false);
 	}
 
 	public IEnumerator CameraPan(Transform end, float endDepth){
