@@ -20,6 +20,7 @@ public class RewardMachine : MonoBehaviour {
 	UILabel infoLabel;
 	UILabel rewardBoxLabel;
 	UILabel rewardButtonLabel;
+	public UILabel rewardCost;
 	UISprite rewardBox;
 
 	GameController gameController;
@@ -35,6 +36,7 @@ public class RewardMachine : MonoBehaviour {
 		rewardBoxLabel = rewardScreen.transform.FindChild ("RewardItem").transform.FindChild ("Label").GetComponent<UILabel> ();
 		rewardBox = rewardScreen.transform.FindChild ("RewardItem").transform.FindChild ("Checked").GetComponent<UISprite> ();
 		rewardButtonLabel = rewardScreen.transform.FindChild ("RewardButton").transform.FindChild ("Label").GetComponent<UILabel> ();
+		//rewardCost = rewardScreen.transform.FindChild ("RewardCost").GetComponent<UILabel> ();
 	}
 	
 	// Update is called once per frame
@@ -121,6 +123,7 @@ public class RewardMachine : MonoBehaviour {
 				availableRewards.Add (kp.Key,kp.Value);	
 			};
 		};
+		rewardCost.text = "Cost: "+ tierCost [currentTier];
 	}
 
 	//TESTING: carga todos los unlockables sin diferenciar por tier

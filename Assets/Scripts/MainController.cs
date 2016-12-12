@@ -56,6 +56,7 @@ public class MainController : MonoBehaviour
 	// Use this for initialization
 	void Awake () 
 	{
+		coins = PlayerPrefs.GetInt ("Coins");
 		unlockables = new Dictionary<int,Unlockable> ();
 		LoadUnlockables ();
 		LoadDefaults ();
@@ -63,16 +64,15 @@ public class MainController : MonoBehaviour
 		gameController.playing = false;
 		rewardMachine = GameObject.FindGameObjectWithTag ("RewardMachine").GetComponent<RewardMachine> ();
 		rewardMachine.availableRewards = new Dictionary<int, Unlockable> ();
-		rewardMachine.LoadTier (0);
+
 		Debug.Log ("Presiona 'L' para ver lista de items y estado, 'R' para desbloquear un item");
 		coinsLabel = GameObject.Find ("Coins").GetComponent<UILabel> ();
 		distance = GameObject.Find ("Distance");
-		distanceLabel = distance.GetComponent<UILabel> ();
-		//distanceTween = distance.GetComponent<TweenAlpha> ();
-		//selectScreen.SetActive (false);
+		//distanceLabel = distance.GetComponent<UILabel> ();
 		EnableAd (false);
 		ToggleButtons (true);
 		rewardButton.SetActive (false);
+		rewardMachine.LoadTier (0);
 	}
 
 	/*void Start(){
@@ -359,5 +359,9 @@ public class MainController : MonoBehaviour
 	public void ToggleButtons(bool b){
 		rewardButton.SetActive (b);
 		inventoryButton.SetActive (b);
+	}
+
+	void OnApplicationQuit(){
+		PlayerPrefs.SetInt ("Coins", coins);
 	}
 }
