@@ -46,7 +46,8 @@ public class MainController : MonoBehaviour
 	GameObject distance;
 	//TweenAlpha distanceTween;
 
-	bool restartAllowed = false;
+	[HideInInspector]
+	public bool restartAllowed = false;
 
 	[Header("Ads")]
 	public GameObject ad;
@@ -62,7 +63,7 @@ public class MainController : MonoBehaviour
 		gameController.playing = false;
 		rewardMachine = GameObject.FindGameObjectWithTag ("RewardMachine").GetComponent<RewardMachine> ();
 		rewardMachine.availableRewards = new Dictionary<int, Unlockable> ();
-		rewardMachine.LoadTier ();
+		rewardMachine.LoadTier (0);
 		Debug.Log ("Presiona 'L' para ver lista de items y estado, 'R' para desbloquear un item");
 		coinsLabel = GameObject.Find ("Coins").GetComponent<UILabel> ();
 		distance = GameObject.Find ("Distance");
@@ -287,8 +288,8 @@ public class MainController : MonoBehaviour
 	}
 
 	public void LoadDefaults(){
-		diverKey = 3; //wetsuit diver
-		jumperKey = 8; //normal jumper
+		diverKey = 0; //wetsuit diver
+		jumperKey = 6; //normal jumper
 		platformKey = 11; //metal platform
 		Unlockable u;
 		if (unlockables.TryGetValue (diverKey, out u)) 
@@ -338,7 +339,7 @@ public class MainController : MonoBehaviour
 	}
 
 	public IEnumerator enableRestart(){
-		yield return new WaitForSeconds (1);
+		yield return new WaitForSeconds (2);
 		restartAllowed = true;
 	}
 

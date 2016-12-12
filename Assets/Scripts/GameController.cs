@@ -77,6 +77,8 @@ public class GameController : MonoBehaviour
 	UILabel endRoundFlipCoins;
 	UILabel endRoundHeight;
 	UILabel endRoundHeightCoins;
+	UILabel endRoundLanding;
+	UILabel endRoundLandingCoins;
 	UILabel endRoundJump;
 	UILabel endRoundTotalCoins;
 	LandingSpot landingSpot;
@@ -97,6 +99,7 @@ public class GameController : MonoBehaviour
     public AudioClip[] blobSFX;
     public AudioClip[] jumperSFX;
 
+	private bool canJump;
 
 	// Use this for initialization
 	void Awake () 
@@ -110,6 +113,8 @@ public class GameController : MonoBehaviour
 		endRoundFlipCoins = endRoundScreen.transform.FindChild ("EndFlipCoins").GetComponent<UILabel> ();
 		endRoundHeight = endRoundScreen.transform.FindChild ("EndHeight").GetComponent<UILabel> ();
 		endRoundHeightCoins = endRoundScreen.transform.FindChild ("EndHeightCoins").GetComponent<UILabel> ();
+		endRoundLanding = endRoundScreen.transform.FindChild ("EndLanding").GetComponent<UILabel> ();
+		endRoundLandingCoins = endRoundScreen.transform.FindChild ("EndLandingCoins").GetComponent<UILabel> ();
 		endRoundTotalCoins = endRoundScreen.transform.FindChild ("EndTotalCoins").GetComponent<UILabel> ();
 		endRoundJump = endRoundScreen.transform.FindChild ("EndRoundText").GetComponent<UILabel> ();
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
@@ -254,10 +259,11 @@ public class GameController : MonoBehaviour
 		controllingJumper = true;
 		cam.GetComponent<CameraController> ().target = jumper.transform;
 		cam.GetComponent<CameraController> ().UpdateCamera (platformProps);
-		//jumperJumpForce = new Vector3 (platformProps.jumpForceX, jumperJumpForce.y, jumperJumpForce.z);
+		jumperJumpForce = new Vector3 (platformProps.jumpForceX, jumperJumpForce.y, jumperJumpForce.z);
 		//cam.gameObject.GetComponent<GenericMoveCamera> ().LookAtTarget = diver;
 
 		waiting = true;
+		canJump = true;
 	}
 
 	void SetDiverSpinSpeed(float normalSpin, float trickSpin)
@@ -308,6 +314,8 @@ public class GameController : MonoBehaviour
 
         GetComponent<Animator>().SetBool("onAction", false);
         jumper.GetComponent<Animator>().SetBool("onJump", false);
+		if (jumper.GetComponent<DTJumper>() != null)
+			jumper.GetComponent<DTJumper>().JumperSignal(false);
 		diver.GetComponent<Animator> ().SetBool ("Spinning", false);
 		diver.GetComponent<Animator> ().SetBool ("Diving", false);
 		//diverCollider.radius = 0.55f;
@@ -332,6 +340,7 @@ public class GameController : MonoBehaviour
 		diverRigidbody.rotation = diverPos.rotation;
 		diverRigidbody.position = diverPos.position;
 		jumperRigidbody.position = jumperPos;
+		canJump = true;
 	}
 
 	public void ResetRound() //reubica la cámara, muestra pantalla de fin de ronda
@@ -435,15 +444,21 @@ public class GameController : MonoBehaviour
 		endRoundHeight.text = "Height: " + Mathf.Floor (maxHeight * 10) / 10 + "m";
 		int flipCoins = flips * coinsPerFlip;
 		int heightCoins = Mathf.FloorToInt(maxHeight) * coinsPerMeter;
+		int landingCoins = coinSpawner.coinsNumber;
+		foreach (Transform t in coinSpawner.transform){
+			landingCoins--;
+		}
 		if (goodJump) {
 			controller.coins += flipCoins + heightCoins;
 			endRoundFlipCoins.text = "+ " + flipCoins + " coins";
 			endRoundHeightCoins.text = "+ " + heightCoins + " coins";
+			endRoundLandingCoins.text = "+ " + landingCoins + " coins";
 			endRoundJump.text = "Good Jump!";
-			endRoundTotalCoins.text = "Total coins: " + (flipCoins + heightCoins);
+			endRoundTotalCoins.text = "Total coins: " + (flipCoins + heightCoins + landingCoins);
 		} else {
 			endRoundFlipCoins.text = "+ 0 coins";
 			endRoundHeightCoins.text = "+ 0 coins";
+			endRoundLandingCoins.text = "+ 0 coins";
 			endRoundJump.text = "Bad Jump!";
 			endRoundTotalCoins.text = "Total coins: 0";
 		}
@@ -471,45 +486,6 @@ public class GameController : MonoBehaviour
 		}
 	}
 
-	/*void GenerateCoins(int c){
-		BoxCollider area = coinArea.GetComponentInChildren<BoxCollider> ();
-		float sizeX = area.bounds.extents.x;
-		float sizeY = area.bounds.extents.y;
-		float coinAreaX = coinArea.transform.FindChild("Area").transform.position.x - sizeX;
-		float landingSpotX = landingSpot.transform.position.x - landingSpot.GetComponent<BoxCollider> ().bounds.extents.x;
-		Debug.Log (coinAreaX + " " + landingSpotX);
-		while (coinAreaX > landingSpotX) {
-			coinArea.transform.localScale += new Vector3(1f,0f,0f);
-			sizeX = area.bounds.extents.x;
-			Debug.Log (coinAreaX + " " + landingSpotX);
-			coinAreaX = coinArea.transform.FindChild("Area").transform.position.x - sizeX;
-
-		}
-		//Vector3 center = area.center;
-		Vector3 pos = area.transform.position;
-		float lastX = 0;
-		//Debug.Log (center + " " + pos);
-		for (int i = 0; i < c; i++) {
-			float randX = Random.Range (pos.x - sizeX, pos.x + sizeX);
-			float randY = Random.Range (pos.y, pos.y + sizeY);
-			if (i != 0) {
-				while (Mathf.Abs (randX - lastX) < coinSpacing) {
-					randX = Random.Range (pos.x - sizeX, pos.x + sizeX);
-				}
-			}
-			lastX = randX;
-			GameObject newCoin = (GameObject)Instantiate (coin, new Vector3 (randX, randY, pos.z), coin.transform.rotation);
-			newCoin.tag = "Coin";
-		}
-	}
-
-	void CoinCleanup(){
-		GameObject[] coinsInScene = GameObject.FindGameObjectsWithTag ("Coin");
-		for (int i = 0; i < coinsInScene.Length; i++) {
-			Destroy (coinsInScene [i]);
-		}
-	}*/
-
 	void SplashCleanup(){
 		GameObject[] splashes = GameObject.FindGameObjectsWithTag ("Splash");
 		for (int i = 0; i < splashes.Length; i++) {
@@ -534,6 +510,9 @@ public class GameController : MonoBehaviour
 	}
 
 	public void JumperJump(){
+		if (jumper.GetComponent<DTJumper>() != null)
+			jumper.GetComponent<DTJumper>().JumperSignal(true);
+		
 		//jumperRigidbody.AddForce (jumperJumpForce);
 		//jumper.GetComponent<CapsuleCollider>().enabled = false;
 		jumper.GetComponent<Animator> ().SetBool ("onJump", true);
@@ -569,8 +548,9 @@ public class GameController : MonoBehaviour
             int i = Mathf.RoundToInt(Random.Range(0, jumperSFX.Length));
             PlaySFX(jumperSFX[i]);
         }
-        if (str == "Jump")
+		if (str == "Jump" && canJump)
         {
+			canJump = false;
             jumperRigidbody.AddForce (jumperJumpForce);
             jumper.GetComponent<CapsuleCollider>().enabled = false;
         }
@@ -591,4 +571,6 @@ public class GameController : MonoBehaviour
             }
         }
     }
+
+
 }
