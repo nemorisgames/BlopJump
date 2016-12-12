@@ -4,32 +4,32 @@ using System.Collections;
 public class InputController : MonoBehaviour {
 
 	UIButton button;
-	bool pressed;
 	MainController controller;
 	GameController gameController;
+	CameraController cameraController;
+
 
 	// Use this for initialization
 	void Start () {
 		button = GetComponent<UIButton> ();
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController> ();
 		gameController = GameObject.FindGameObjectWithTag ("Blop").GetComponent<GameController> ();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		/*if (gameController.playing && !gameController.diverProps.onGround) {
-			if(button.state == UIButtonColor.State.Pressed){
-				gameController.DiverTrickSpin ();
-			}
-			else {
-				gameController.DiverNormalSpin ();
-			}
-		} */
+		cameraController = Camera.main.GetComponent<CameraController> ();
 	}
 
 	public void Clicked(){
+		if (controller.tutorialScreen.value > 0f) {
+			controller.tutorialScreen.PlayReverse ();
+			//gameController.Setup ();
+			gameController.ResetRound ();
+			controller.ToggleButtons (false);
+		} 
 		if (gameController.waiting && gameController.controllingJumper && !gameController.controllingDiver) {
-			gameController.JumperJump ();
+			if (cameraController.target == gameController.GetJumper ().transform) {
+				gameController.JumperJump ();
+			} else {
+				cameraController.TogglePlatformView ();
+			}
 		} else {
 			controller.CloseWindow ();
 		}

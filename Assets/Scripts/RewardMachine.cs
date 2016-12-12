@@ -13,7 +13,7 @@ public class RewardMachine : MonoBehaviour {
 	public int [] tierCost = {250,300,500};
 	public int currentTier = 0;
 
-	public int remainingRewards;
+	//public int remainingRewards;
 
 	public bool rewardScreenVisible = false;
 
@@ -30,7 +30,7 @@ public class RewardMachine : MonoBehaviour {
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController> ();
 		gameController = GameObject.FindGameObjectWithTag ("Blop").GetComponent<GameController> ();
 		//availableRewards = new Dictionary<int,Unlockable> ();
-		rewardScreen.SetActive (false);
+		//rewardScreen.SetActive (false);
 		infoLabel = rewardScreen.transform.FindChild ("Info").GetComponent<UILabel> ();
 		rewardBoxLabel = rewardScreen.transform.FindChild ("RewardItem").transform.FindChild ("Label").GetComponent<UILabel> ();
 		rewardBox = rewardScreen.transform.FindChild ("RewardItem").transform.FindChild ("Checked").GetComponent<UISprite> ();
@@ -40,11 +40,29 @@ public class RewardMachine : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-		remainingRewards = availableRewards.Count;
+		//remainingRewards = availableRewards.Count;
 
 		if (Input.GetKeyDown (KeyCode.T) && controller.testing) 
 		{
-			LoadTier(currentTier);
+			//LoadTier(currentTier);
+			foreach (KeyValuePair<int,Unlockable> u in availableRewards) 
+			{
+				Debug.Log (u.Key+" "+u.Value.name+","+u.Value.unlocked+"="+PlayerPrefs.GetInt(u.Value.name));
+			}
+		};
+
+		if (Input.GetKeyDown (KeyCode.Q) && controller.testing) 
+		{
+			LoadTier(1);
+			Debug.Log ("tier1");
+		};
+
+		if (Input.GetKeyDown (KeyCode.C) && controller.testing) 
+		{
+			PlayerPrefs.DeleteAll ();
+			controller.UnlockAll (false);
+			Debug.Log ("Cleared prefs");
+			controller.LoadDefaults ();
 		};
 	}
 
@@ -53,11 +71,16 @@ public class RewardMachine : MonoBehaviour {
 	{
 		if (availableRewards.Count > 0 && controller.coins >= tierCost [currentTier]) {
 			StartCoroutine (RewardMachineEffect (20));
-		}
-		else if (controller.coins < tierCost [currentTier]) 
-		{
+		} else if (controller.coins < tierCost [currentTier]) {
 			infoLabel.text = "Not enough coins!";
 			Debug.Log ("Not enough coins!");
+		} else if (availableRewards.Count == 0 && currentTier < 2) {
+			currentTier++;
+			Debug.Log ("Tier " + currentTier);
+			LoadTier (currentTier);
+			if (availableRewards.Count > 0 && controller.coins >= tierCost [currentTier]) {
+				StartCoroutine (RewardMachineEffect (20));
+			}
 		}
 		else
 		{
@@ -73,6 +96,7 @@ public class RewardMachine : MonoBehaviour {
 			key = GetRandom ();
 			if (controller.unlockables.TryGetValue (key, out u)) {
 				rewardBoxLabel.text = u.name;
+				rewardBox.spriteName = u.gameObject.name;
 			}
 			if(i == length-1)
 				UnlockItem (u, key);
@@ -88,6 +112,8 @@ public class RewardMachine : MonoBehaviour {
 	//carga los unlockables del tier indicado
 	public void LoadTier(int tier)
 	{
+		currentTier = tier;
+		availableRewards.Clear ();
 		foreach (KeyValuePair<int,Unlockable> kp in controller.unlockables) 
 		{
 			if (kp.Value.tier == tier && kp.Value.unlocked == false) 
@@ -128,27 +154,38 @@ public class RewardMachine : MonoBehaviour {
 	public void ToggleRewardScreen()
 	{
 		if (!gameController.playing || gameController.controllingJumper) {
-			if (controller.selectScreenVisible) {
-				controller.ToggleSelectScreen ();
-				controller.LastLoadout ();
-			}
-			if (gameController.endRoundScreenVisible) {
-				gameController.ToggleEndRoundScreen ();
-			}
+			
 			if (rewardScreenVisible) {
 				controller.gameController.waiting = true;
-				rewardScreen.SetActive (false);
+				rewardScreen.GetComponent<TweenAlpha>().PlayReverse();
+				//rewardScreen.SetActive (false);
 				rewardScreenVisible = false;
+				controller.EnableAd (false);
+
 			} else {
-				gameController.jumpBar.Initialize ();
+
+				if(controller.tutorialScreen.value > 0f)
+					controller.tutorialScreen.PlayReverse ();
+
+				if (controller.selectScreenVisible) {
+					controller.ToggleSelectScreen ();
+					controller.LastLoadout ();
+				}
+				if (gameController.endRoundScreenVisible) {
+					gameController.ToggleEndRoundScreen ();
+				}
 				UpdateCoins ();
 				infoLabel.text = "";
 				rewardBoxLabel.text = "???";
+				rewardBox.spriteName = "";
 				rewardButtonLabel.text = "Get Reward (" + tierCost [currentTier] + " coins)";
 				controller.gameController.waiting = false;
-				rewardScreen.SetActive (true);
+				//rewardScreen.SetActive (true);
+				rewardScreen.GetComponent<TweenAlpha>().PlayForward();
 				rewardScreenVisible = true;
+				controller.EnableAd (true);
 			}
+
 		}
 	}
 

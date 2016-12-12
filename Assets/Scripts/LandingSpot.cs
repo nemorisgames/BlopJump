@@ -28,7 +28,7 @@ public class LandingSpot : MonoBehaviour {
 
 	void OnTriggerEnter(Collider c)
 	{
-		anim = gameController.ReturnDiver().GetComponent<Animator> ();
+		anim = gameController.GetDiver().GetComponent<Animator> ();
 		if (_enabled && c.tag != "CoinArea")
 		{
 			if(anim.GetBool("Spinning"))

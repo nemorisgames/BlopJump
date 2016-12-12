@@ -19,11 +19,14 @@ public class MainController : MonoBehaviour
 	public List<Platform> platformList; //para agregar prefabs desde el inspector
 	public RewardMachine rewardMachine;
 	public GameController gameController;
+	public TweenAlpha tutorialScreen;
 	public GameObject selectScreen;
 	public GameObject selectScreenBox;
 	public GameObject[] containers;
 	public GameObject[] scrollViews;
 	public float boxDistance;
+	public GameObject rewardButton;
+	public GameObject inventoryButton;
 
 	[HideInInspector]
 	public int diverKey;
@@ -35,12 +38,18 @@ public class MainController : MonoBehaviour
 	int jumperKeyAux;
 	int platformKeyAux;
 
-	[HideInInspector]
+	//[HideInInspector]
 	public bool selectScreenVisible = false;
 	UILabel coinsLabel;
 	public UILabel distanceLabel;
 	GameObject distance;
 	//TweenAlpha distanceTween;
+
+	bool restartAllowed = false;
+
+	[Header("Ads")]
+	public GameObject ad;
+	public SpilGamesAPI spilAPI;
 
 	// Use this for initialization
 	void Awake () 
@@ -58,7 +67,10 @@ public class MainController : MonoBehaviour
 		distance = GameObject.Find ("Distance");
 		distanceLabel = distance.GetComponent<UILabel> ();
 		//distanceTween = distance.GetComponent<TweenAlpha> ();
-		selectScreen.SetActive (false);
+		//selectScreen.SetActive (false);
+		EnableAd (false);
+		ToggleButtons (true);
+		rewardButton.SetActive (false);
 	}
 
 	/*void Start(){
@@ -89,14 +101,14 @@ public class MainController : MonoBehaviour
 
 			if (Input.GetKeyDown (KeyCode.U) && !selectScreenVisible && !rewardMachine.rewardScreenVisible) 
 			{
-				UnlockAll ();
+				UnlockAll (true);
 				Debug.Log ("cheater!");
 			};
 		}
 	}
 
 	void LateUpdate(){
-		coinsLabel.text = "Coins: " + coins;
+		coinsLabel.text = ""+coins;
 	}
 
 	//carga datos de las listas expuestas en el inspector a los diccionarios
@@ -105,36 +117,61 @@ public class MainController : MonoBehaviour
 		int count = 0;
 		foreach (Diver d in diverList) 
 		{
+			if (PlayerPrefs.GetInt (d.name) != 1) {
+				d.unlocked = false;
+				PlayerPrefs.SetInt (d.name, 0);
+			} else {
+				d.unlocked = true;
+			}
+			unlockables.Add (count, d);
+			/*
 			d.unlocked = false;
 			unlockables.Add (count, d);
 			PlayerPrefs.SetInt (d.name, 0);
+			 */
 			count++;
 		};
 		foreach (Jumper j in jumperList) 
 		{
-			j.unlocked = false;
+			if (PlayerPrefs.GetInt (j.name) != 1) {
+				j.unlocked = false;
+				PlayerPrefs.SetInt (j.name, 0);
+			} else {
+				j.unlocked = true;
+			}
 			unlockables.Add (count,j);
-			PlayerPrefs.SetInt (j.name, 0);
+			/*j.unlocked = false;
+			unlockables.Add (count,j);
+			PlayerPrefs.SetInt (j.name, 0);*/
 			count++;
 		};
 		foreach (Platform p in platformList) 
 		{
-			p.unlocked = false;
+			if (PlayerPrefs.GetInt (p.name) != 1) {
+				p.unlocked = false;
+				PlayerPrefs.SetInt (p.name, 0);
+			} else {
+				p.unlocked = true;
+			}
+			unlockables.Add (count, p);
+			/*p.unlocked = false;
 			unlockables.Add (count,p);
-			PlayerPrefs.SetInt (p.name, 0);
+			PlayerPrefs.SetInt (p.name, 0);*/
 			count++;
 		};
 	}
 
+	public void EnableAd(bool b){
+		if (b) {
+			spilAPI.GameBreak ();
+		}
+		ad.SetActive (b);
+	}
+
 	public void ToggleSelectScreen(){
 		if (!gameController.playing || gameController.controllingJumper) {
-			if (rewardMachine.rewardScreenVisible) {
-				rewardMachine.ToggleRewardScreen ();
-			}
-			if (gameController.endRoundScreenVisible) {
-				gameController.ToggleEndRoundScreen ();
-			}
 			if (selectScreenVisible) {
+				// si esta visible -> cerrar pantalla, chequear si las otras estan cerradas
 				for (int i = 0; i < 3; i++) {
 					foreach (Transform t in scrollViews[i].transform) {
 						GameObject.Destroy (t.gameObject);
@@ -142,11 +179,27 @@ public class MainController : MonoBehaviour
 					containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
 				}
 				gameController.waiting = true;
-				selectScreen.SetActive (false);
+				//selectScreen.SetActive (false);
+				selectScreen.GetComponent<TweenAlpha>().PlayReverse();
 				selectScreenVisible = false;
+
 			} else {
+				//si no esta visible -> cerrar otras pantallas, abrir esta
+
+				if(tutorialScreen.value > 0f)
+					tutorialScreen.PlayReverse ();
+
+				if (rewardMachine.rewardScreenVisible) {
+					rewardMachine.ToggleRewardScreen ();
+				}
+
+				if (gameController.endRoundScreenVisible) {
+					gameController.ToggleEndRoundScreen ();
+				}
+					
+
 				gameController.waiting = false;
-				gameController.jumpBar.Initialize ();
+				//gameController.jumpBar.Initialize ();
 				float diverAux = -210;
 				float jumperAux = -210;
 				float platformAux = -210;
@@ -160,7 +213,7 @@ public class MainController : MonoBehaviour
 							box.name = u.Key.ToString ();
 							box.tag = "Diver";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Diver> ().name;
-
+							box.transform.FindChild("Checked").GetComponent<UISprite>().spriteName = u.Value.gameObject.name;
 							box.transform.localPosition = new Vector3 (diverAux, box.transform.position.y, box.transform.position.z);
 							box.GetComponent<UIToggle> ().group = 1;
 							diverAux += boxDistance;
@@ -174,6 +227,7 @@ public class MainController : MonoBehaviour
 							box.name = u.Key.ToString ();
 							box.tag = "Jumper";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Jumper> ().name;
+							box.transform.FindChild("Checked").GetComponent<UISprite>().spriteName = u.Value.gameObject.name;
 							box.GetComponent<UIDragScrollView> ().scrollView = GetComponentInParent<UIScrollView> ();
 							box.transform.localPosition = new Vector3 (jumperAux, box.transform.position.y, box.transform.position.z);
 							box.GetComponent<UIToggle> ().group = 2;
@@ -187,6 +241,7 @@ public class MainController : MonoBehaviour
 							box.name = u.Key.ToString ();
 							box.tag = "Platform";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Platform> ().name;
+							box.transform.FindChild("Checked").GetComponent<UISprite>().spriteName = u.Value.gameObject.name;
 							box.GetComponent<UIDragScrollView> ().scrollView = GetComponentInParent<UIScrollView> ();
 							box.transform.localPosition = new Vector3 (platformAux, box.transform.position.y, box.transform.position.z);
 							box.GetComponent<UIToggle> ().group = 3;
@@ -201,9 +256,11 @@ public class MainController : MonoBehaviour
 				for (int i = 0; i < 3; i++) {
 					containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
 				}
-				selectScreen.SetActive (true);
+				//selectScreen.SetActive (true);
+				selectScreen.GetComponent<TweenAlpha>().PlayForward();
 				selectScreenVisible = true;
 			}
+
 		}
 	}
 
@@ -222,12 +279,13 @@ public class MainController : MonoBehaviour
 		{
 			gameController.platformGameObject = u.gameObject;
 		}
-		gameController.ResetPosition ();
+		gameController.EndRound ();
 		gameController.Setup ();
+		gameController.ResetRound ();
 		ToggleSelectScreen ();
 	}
 
-	void LoadDefaults(){
+	public void LoadDefaults(){
 		diverKey = 3; //wetsuit diver
 		jumperKey = 8; //normal jumper
 		platformKey = 11; //metal platform
@@ -235,44 +293,57 @@ public class MainController : MonoBehaviour
 		if (unlockables.TryGetValue (diverKey, out u)) 
 		{
 			u.unlocked = true;
+			PlayerPrefs.SetInt (u.name, 1);
 		}
 		if (unlockables.TryGetValue (jumperKey, out u)) 
 		{
 			u.unlocked = true;
+			PlayerPrefs.SetInt (u.name, 1);
 		}
 		if (unlockables.TryGetValue (platformKey, out u)) 
 		{
 			u.unlocked = true;
+			PlayerPrefs.SetInt (u.name, 1);
+		}
+	}
+
+	public void CheckOpenScreens(){
+		if (!selectScreenVisible && !rewardMachine.rewardScreenVisible && gameController.controllingDiver) {
+			gameController.ResetRound ();
+			gameController.jumpBar.Initialize ();
 		}
 	}
 
 	public void CloseWindow()
 	{
-		if (selectScreenVisible) {
-			ToggleSelectScreen ();
-			LastLoadout ();
-			if (gameController.controllingDiver) {
+		if (restartAllowed) {
+			if (selectScreenVisible) {
+				ToggleSelectScreen ();
+				LastLoadout ();
+				if (gameController.controllingDiver) {
+					gameController.ResetRound ();
+				}
+			} else if (rewardMachine.rewardScreenVisible) {
+				rewardMachine.ToggleRewardScreen ();
+				if (gameController.controllingDiver) {
+					gameController.ResetRound ();
+				}
+			} else if (gameController.endRoundScreenVisible) {
+				gameController.ToggleEndRoundScreen ();
 				gameController.ResetRound ();
+				restartAllowed = false;
 			}
-		} else if (rewardMachine.rewardScreenVisible) {
-			rewardMachine.ToggleRewardScreen ();
-			gameController.ResetRound ();
-		} else if (gameController.endRoundScreenVisible) {
-			gameController.ToggleEndRoundScreen ();
-			gameController.ResetRound ();
 		}
 	}
 
-	/*public IEnumerator PlusCoin(int value){
-		plusCoinLabel.text = "+" + value;
-		plusCoinTween.Toggle ();
-		yield return new WaitForSeconds (1.2f);
-		plusCoinTween.Toggle ();
-	}*/
+	public IEnumerator enableRestart(){
+		yield return new WaitForSeconds (1);
+		restartAllowed = true;
+	}
 
-	void UnlockAll(){ //for testing purposes only
+	public void UnlockAll(bool b){ //for testing purposes only
 		foreach(KeyValuePair<int,Unlockable> u in unlockables){
-			u.Value.unlocked = true;
+			u.Value.unlocked = b;
 		};
 		rewardMachine.availableRewards.Clear ();
 	}
@@ -281,5 +352,10 @@ public class MainController : MonoBehaviour
 		diverKey = diverKeyAux;
 		jumperKey = jumperKeyAux;
 		platformKey = platformKeyAux;
+	}
+
+	public void ToggleButtons(bool b){
+		rewardButton.SetActive (b);
+		inventoryButton.SetActive (b);
 	}
 }

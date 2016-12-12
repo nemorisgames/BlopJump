@@ -10,15 +10,16 @@ public class Coin : MonoBehaviour {
 	void Awake(){
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController>();
         t = GetComponent<Transform>();
+		t.Rotate(Vector3.forward * 90);
 	}
 
     void Update()
     {
-        t.Rotate(Vector3.right * 50  * Time.deltaTime);
+        t.Rotate(Vector3.right * 100  * Time.deltaTime);
     }
 	
 	void OnTriggerEnter(Collider other){
-		if (other.tag == "Diver") {
+		if (other.tag == "Diver" || other.tag == "Foot" || other.tag == "Arm") {
 			controller.coins += value;
 			//StartCoroutine (controller.PlusCoin (value));
 			Destroy (this.gameObject);
