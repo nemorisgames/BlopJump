@@ -22,6 +22,7 @@ public class MainController : MonoBehaviour
 	public TweenAlpha tutorialScreen;
 	public GameObject selectScreen;
 	public GameObject selectScreenBox;
+	public GameObject selectScreenBoxLocked;
 	public GameObject[] containers;
 	public GameObject[] scrollViews;
 	public float boxDistance;
@@ -207,9 +208,9 @@ public class MainController : MonoBehaviour
 				jumperKeyAux = jumperKey;
 				platformKeyAux = platformKey;
 				foreach (KeyValuePair<int,Unlockable> u in unlockables) {
-					if (u.Value.unlocked) {
+					//if (u.Value.unlocked) {
 						if (u.Value.GetComponent<Diver> () != null) {
-							GameObject box = (GameObject)Instantiate (selectScreenBox, containers [0].transform.position, Quaternion.identity, scrollViews [0].transform);
+						GameObject box = (GameObject)Instantiate (u.Value.unlocked?selectScreenBox:selectScreenBoxLocked, containers [0].transform.position, Quaternion.identity, scrollViews [0].transform);
 							box.name = u.Key.ToString ();
 							box.tag = "Diver";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Diver> ().name;
@@ -223,7 +224,7 @@ public class MainController : MonoBehaviour
 
 						}
 						if (u.Value.GetComponent<Jumper> () != null) {
-							GameObject box = (GameObject)Instantiate (selectScreenBox, containers [1].transform.position, Quaternion.identity, scrollViews [1].transform);
+						GameObject box = (GameObject)Instantiate (u.Value.unlocked?selectScreenBox:selectScreenBoxLocked, containers [1].transform.position, Quaternion.identity, scrollViews [1].transform);
 							box.name = u.Key.ToString ();
 							box.tag = "Jumper";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Jumper> ().name;
@@ -237,7 +238,7 @@ public class MainController : MonoBehaviour
 							}
 						}
 						if (u.Value.GetComponent<Platform> () != null) {
-							GameObject box = (GameObject)Instantiate (selectScreenBox, containers [2].transform.position, Quaternion.identity, scrollViews [2].transform);
+						GameObject box = (GameObject)Instantiate (u.Value.unlocked?selectScreenBox:selectScreenBoxLocked, containers [2].transform.position, Quaternion.identity, scrollViews [2].transform);
 							box.name = u.Key.ToString ();
 							box.tag = "Platform";
 							box.GetComponentInChildren<UILabel> ().text = u.Value.GetComponent<Platform> ().name;
@@ -250,7 +251,7 @@ public class MainController : MonoBehaviour
 								box.GetComponent<UIToggle> ().Set (true);
 							}
 						}
-					}
+					//}
 				}
 
 				for (int i = 0; i < 3; i++) {

@@ -27,4 +27,8 @@ public class SaveKey : MonoBehaviour
 			mc.platformKey = int.Parse (name);
 		};
 	}
+
+	public void verReward(){
+		mc.rewardMachine.ToggleRewardScreen ();
+	}
 }
