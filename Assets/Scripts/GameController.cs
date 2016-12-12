@@ -22,7 +22,8 @@ public class GameController : MonoBehaviour
 	public float windForce;
 	public float jumpHeightCompensate;
 	public int coinsPerFlip;
-	public int numCoins;
+	//public int numCoins;
+	public int coinsPerMeter;
 	public float coinSpacing;
 
 	public GameObject coin;
@@ -257,7 +258,6 @@ public class GameController : MonoBehaviour
 		//cam.gameObject.GetComponent<GenericMoveCamera> ().LookAtTarget = diver;
 
 		waiting = true;
-		//GenerateCoins (numCoins);
 	}
 
 	void SetDiverSpinSpeed(float normalSpin, float trickSpin)
@@ -311,7 +311,7 @@ public class GameController : MonoBehaviour
 		diver.GetComponent<Animator> ().SetBool ("Spinning", false);
 		diver.GetComponent<Animator> ().SetBool ("Diving", false);
 		//diverCollider.radius = 0.55f;
-		AddFlipCoins (Mathf.FloorToInt (flips));
+		AddCoins (Mathf.FloorToInt (flips));
 		Debug.Log ("Flips: "+Mathf.Round (flips));
 
 		jumpEnd = Time.time;
@@ -324,7 +324,6 @@ public class GameController : MonoBehaviour
 
 		splash = false;
 		cam.GetComponent<CameraController>().follow = false;
-		coinSpawner.Init ();
 	}
 
 	public void ResetPosition (){
@@ -345,7 +344,6 @@ public class GameController : MonoBehaviour
 		controllingJumper = true;
 		controllingDiver = false;
 		//CoinCleanup ();
-		//GenerateCoins (numCoins);
 		landingSpot.enableLanding (true);
 		SetLandingSpot ();
 		CalculateDistance ();
@@ -357,6 +355,7 @@ public class GameController : MonoBehaviour
 		SplashCleanup ();
 		maxHeight = 0;
 		coinGrabHeight = 1;
+		coinSpawner.Init ();
 	}
 
 	void DiverJump(Vector3 jumpForce)
@@ -431,11 +430,11 @@ public class GameController : MonoBehaviour
 		};
 	}
 
-	void AddFlipCoins(int flips){
+	void AddCoins(int flips){
 		endRoundFlips.text = "Flips: " + flips;
 		endRoundHeight.text = "Height: " + Mathf.Floor (maxHeight * 10) / 10 + "m";
 		int flipCoins = flips * coinsPerFlip;
-		int heightCoins = Mathf.FloorToInt(maxHeight) * 2;
+		int heightCoins = Mathf.FloorToInt(maxHeight) * coinsPerMeter;
 		if (goodJump) {
 			controller.coins += flipCoins + heightCoins;
 			endRoundFlipCoins.text = "+ " + flipCoins + " coins";
@@ -554,7 +553,7 @@ public class GameController : MonoBehaviour
 		//Debug.Log (LandingSpotExtent ());
 		//Debug.Log (landingSpot.minDistance [jumperProps.index, platformProps.index] + " " + landingSpot.maxDistance [jumperProps.index, platformProps.index]);
 		float rand = Random.Range (landingSpot.maxDistance [jumperProps.index, platformProps.index] - LandingSpotExtent()*1.5f, landingSpot.minDistance [jumperProps.index, platformProps.index]);
-		landingSpot.transform.position = new Vector3 (rand, landingSpot.transform.position.y, landingSpot.transform.position.z);
+		landingSpot.transform.position = new Vector3 (rand, landingSpot.transform.position.y, diverRigidbody.position.z);
 	}
 
 	public float LandingSpotExtent(){
