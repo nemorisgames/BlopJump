@@ -220,7 +220,7 @@ public class GameController : MonoBehaviour
 
 	public void Setup()
 	{
-		if (diver != null) 
+		/*if (diver != null) 
 		{
 			Destroy (diver);
 		}
@@ -233,7 +233,7 @@ public class GameController : MonoBehaviour
 		if (platform != null) 
 		{
 			Destroy (platform);
-		}
+		}*/
 
 		enableWind = false;
 

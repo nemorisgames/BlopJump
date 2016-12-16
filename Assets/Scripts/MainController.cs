@@ -292,7 +292,8 @@ public class MainController : MonoBehaviour
 	}
 
 	public void LoadDefaults(){
-		if (PlayerPrefs.GetInt ("") != null && PlayerPrefs.GetInt ("notFirstTime") != 1) {
+		if (PlayerPrefs.GetInt ("notFirstTime") != 1) {
+			Debug.Log ("here");
 			diverKey = 0; //wetsuit diver
 			jumperKey = 6; //normal jumper
 			platformKey = 11; //metal platform

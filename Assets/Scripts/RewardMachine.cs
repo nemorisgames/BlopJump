@@ -65,7 +65,7 @@ public class RewardMachine : MonoBehaviour {
 			controller.UnlockAll (false);
 			Debug.Log ("Cleared prefs");
 			controller.coins = 0;
-			controller.LoadDefaults ();
+			//controller.LoadDefaults ();
 		};
 	}
 
