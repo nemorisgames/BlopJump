@@ -122,7 +122,7 @@ public class GameController : MonoBehaviour
 		landingSpotBC = landingSpot.gameObject.GetComponent<BoxCollider> ();
 		jumpBar = GameObject.FindGameObjectWithTag ("JumpBar").GetComponent<JumpBar> ();
 		jumpBar.gameObject.SetActive (false);
-		Setup ();
+		//Setup ();
 
 		maxHeight = 0;
 		coinGrabHeight = 1;
@@ -452,12 +452,13 @@ public class GameController : MonoBehaviour
 			landingCoins--;
 		}
 		if (goodJump) {
-			controller.coins += flipCoins + heightCoins;
+			endRoundJump.text = "Good Jump!";
+			/*controller.coins += flipCoins + heightCoins + landingCoins;
 			endRoundFlipCoins.text = "+ " + flipCoins + " coins";
 			endRoundHeightCoins.text = "+ " + heightCoins + " coins";
 			endRoundLandingCoins.text = "+ " + landingCoins + " coins";
-			endRoundJump.text = "Good Jump!";
-			endRoundTotalCoins.text = "Total coins: " + (flipCoins + heightCoins + landingCoins);
+			endRoundTotalCoins.text = "Total coins: " + (flipCoins + heightCoins + landingCoins);*/
+			StartCoroutine (EndScreenCoinsEffect (flipCoins, heightCoins, landingCoins));
 		} else {
 			endRoundFlipCoins.text = "+ 0 coins";
 			endRoundHeightCoins.text = "+ 0 coins";
@@ -468,6 +469,45 @@ public class GameController : MonoBehaviour
 
 	}
 
+
+	IEnumerator EndScreenCoinsEffect(int flipCoins, int heightCoins, int landingCoins){
+		float f1 = 0.1f;
+		float f2 = 0.05f;
+		yield return new WaitForSeconds (0.5f);
+		StartCoroutine(EndScreenText(endRoundFlipCoins,flipCoins,f1));
+		yield return new WaitForSeconds (f1 * flipCoins);
+		StartCoroutine(EndScreenText(endRoundHeightCoins,heightCoins,f1));
+		yield return new WaitForSeconds (f1 * heightCoins);
+		StartCoroutine(EndScreenText(endRoundLandingCoins,landingCoins,f1));
+		yield return new WaitForSeconds (f1 * landingCoins);
+		//StartCoroutine (EndScreenText (endRoundTotalCoins, flipCoins + heightCoins + landingCoins,f2));
+		//yield return new WaitForSeconds (f2 * flipCoins + heightCoins + landingCoins);
+		//endRoundTotalCoins.text = "Total coins: " + (flipCoins + heightCoins + landingCoins);
+		StartCoroutine(EndScreenTotalText(endRoundTotalCoins,flipCoins + heightCoins + landingCoins,f2));
+		yield return new WaitForSeconds (f2 * flipCoins + heightCoins + landingCoins);
+		//controller.coins += flipCoins + heightCoins + landingCoins;
+		StartCoroutine (controller.enableRestart (0.1f));
+	}
+
+	IEnumerator EndScreenText(UILabel label, int amount, float f){
+		for (int i = 0; i < amount; i++) {
+			label.text = "+ " + i + " coins";
+			int c = Mathf.RoundToInt(Random.Range(0, 1));
+			PlaySFX(coinsSFX[c]);
+			yield return new WaitForSeconds (f);
+		}
+	}
+
+	IEnumerator EndScreenTotalText(UILabel label, int amount, float f){
+		for (int i = 0; i < amount; i++) {
+			label.text = "Total coins: " + i;
+			controller.coins ++;
+			int c = Mathf.RoundToInt(Random.Range(0, 1));
+			PlaySFX(coinsSFX[c]);
+			yield return new WaitForSeconds (f);
+		}
+	}
+
 	public void ToggleEndRoundScreen(){
 		if (endRoundScreenVisible) 
 		{
@@ -476,6 +516,7 @@ public class GameController : MonoBehaviour
 			endRoundScreen.GetComponent<TweenAlpha>().PlayReverse();
 			controller.EnableAd (false);
 			ResetPosition ();
+			controller.disableRestart();
 		} 
 		else 
 		{
@@ -485,7 +526,8 @@ public class GameController : MonoBehaviour
 			//endRoundScreen.SetActive (true);
 			controller.EnableAd (true);
 			//EndRound ();
-			StartCoroutine (controller.enableRestart ());
+			controller.disableRestart();
+			//StartCoroutine (controller.enableRestart (2f));
 		}
 	}
 
@@ -574,6 +616,5 @@ public class GameController : MonoBehaviour
             }
         }
     }
-
 
 }

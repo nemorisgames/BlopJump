@@ -64,14 +64,15 @@ public class MainController : MonoBehaviour
 		gameController.playing = false;
 		rewardMachine = GameObject.FindGameObjectWithTag ("RewardMachine").GetComponent<RewardMachine> ();
 		rewardMachine.availableRewards = new Dictionary<int, Unlockable> ();
-
 		Debug.Log ("Presiona 'L' para ver lista de items y estado, 'R' para desbloquear un item");
 		coinsLabel = GameObject.Find ("Coins").GetComponent<UILabel> ();
 		distance = GameObject.Find ("Distance");
 		//distanceLabel = distance.GetComponent<UILabel> ();
 		EnableAd (false);
-		ToggleButtons (true);
-		rewardButton.SetActive (false);
+		ToggleButtons (false);
+		if (PlayerPrefs.GetInt ("notFirstTime") == 1) {
+			ToggleButtons (true);
+		}
 		rewardMachine.LoadTier (0);
 	}
 
@@ -79,6 +80,10 @@ public class MainController : MonoBehaviour
 		plusCoinTween.ResetToBeginning ();
 		plusCoinTween.value = 0;
 	}*/
+
+	void Start(){
+		gameController.Setup ();
+	}
 
 	// Update is called once per frame
 	void Update () 
@@ -174,16 +179,11 @@ public class MainController : MonoBehaviour
 		if (!gameController.playing || gameController.controllingJumper) {
 			if (selectScreenVisible) {
 				// si esta visible -> cerrar pantalla, chequear si las otras estan cerradas
-				for (int i = 0; i < 3; i++) {
-					foreach (Transform t in scrollViews[i].transform) {
-						GameObject.Destroy (t.gameObject);
-					}
-					containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
-				}
 				gameController.waiting = true;
 				//selectScreen.SetActive (false);
 				selectScreen.GetComponent<TweenAlpha>().PlayReverse();
 				selectScreenVisible = false;
+				StartCoroutine (SelectScreenItemCleanup ());
 
 			} else {
 				//si no esta visible -> cerrar otras pantallas, abrir esta
@@ -281,6 +281,7 @@ public class MainController : MonoBehaviour
 		{
 			gameController.platformGameObject = u.gameObject;
 		}
+		UpdateGearPrefs ();
 		gameController.EndRound ();
 		gameController.Setup ();
 		gameController.ResetRound ();
@@ -288,25 +289,42 @@ public class MainController : MonoBehaviour
 	}
 
 	public void LoadDefaults(){
-		diverKey = 0; //wetsuit diver
-		jumperKey = 6; //normal jumper
-		platformKey = 11; //metal platform
-		Unlockable u;
+		if (PlayerPrefs.GetInt ("") != null && PlayerPrefs.GetInt ("notFirstTime") != 1) {
+			diverKey = 0; //wetsuit diver
+			jumperKey = 6; //normal jumper
+			platformKey = 11; //metal platform
+			PlayerPrefs.SetInt("notFirstTime",1);
+		} else {
+			diverKey = PlayerPrefs.GetInt ("lastDiver");
+			jumperKey = PlayerPrefs.GetInt ("lastJumper");
+			platformKey = PlayerPrefs.GetInt ("lastPlatform");
+		}
+		Unlockable u = null;
 		if (unlockables.TryGetValue (diverKey, out u)) 
 		{
-			u.unlocked = true;
-			PlayerPrefs.SetInt (u.name, 1);
+			if(!u.unlocked){
+				u.unlocked = true;
+				PlayerPrefs.SetInt (u.name, 1);
+			}
+			gameController.diverGameObject = u.gameObject;
 		}
 		if (unlockables.TryGetValue (jumperKey, out u)) 
 		{
-			u.unlocked = true;
-			PlayerPrefs.SetInt (u.name, 1);
+			if(!u.unlocked){
+				u.unlocked = true;
+				PlayerPrefs.SetInt (u.name, 1);
+			}
+			gameController.jumperGameObject = u.gameObject;
 		}
 		if (unlockables.TryGetValue (platformKey, out u)) 
 		{
-			u.unlocked = true;
-			PlayerPrefs.SetInt (u.name, 1);
+			if(!u.unlocked){
+				u.unlocked = true;
+				PlayerPrefs.SetInt (u.name, 1);
+			}
+			gameController.platformGameObject = u.gameObject;
 		}
+
 	}
 
 	public void CheckOpenScreens(){
@@ -338,9 +356,13 @@ public class MainController : MonoBehaviour
 		}
 	}
 
-	public IEnumerator enableRestart(){
-		yield return new WaitForSeconds (2);
+	public IEnumerator enableRestart(float f){
+		yield return new WaitForSeconds (f);
 		restartAllowed = true;
+	}
+
+	public void disableRestart(){
+		restartAllowed = false;
 	}
 
 	public void UnlockAll(bool b){ //for testing purposes only
@@ -354,6 +376,7 @@ public class MainController : MonoBehaviour
 		diverKey = diverKeyAux;
 		jumperKey = jumperKeyAux;
 		platformKey = platformKeyAux;
+		UpdateGearPrefs ();
 	}
 
 	public void ToggleButtons(bool b){
@@ -364,4 +387,21 @@ public class MainController : MonoBehaviour
 	void OnApplicationQuit(){
 		PlayerPrefs.SetInt ("Coins", coins);
 	}
+
+	void UpdateGearPrefs(){
+		PlayerPrefs.SetInt ("lastDiver", diverKey);
+		PlayerPrefs.SetInt ("lastJumper", jumperKey);
+		PlayerPrefs.SetInt ("lastPlatform", platformKey);
+	}
+
+	IEnumerator SelectScreenItemCleanup(){
+		yield return new WaitForSeconds (1);
+		for (int i = 0; i < 3; i++) {
+			foreach (Transform t in scrollViews[i].transform) {
+				GameObject.Destroy (t.gameObject);
+			}
+			containers [i].GetComponent<UIDragScrollView> ().scrollView.ResetPosition ();
+		}
+	}
+
 }

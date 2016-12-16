@@ -64,6 +64,7 @@ public class RewardMachine : MonoBehaviour {
 			PlayerPrefs.DeleteAll ();
 			controller.UnlockAll (false);
 			Debug.Log ("Cleared prefs");
+			controller.coins = 0;
 			controller.LoadDefaults ();
 		};
 	}
@@ -110,6 +111,7 @@ public class RewardMachine : MonoBehaviour {
 		rewardButtonLabel.text = "Get Reward (" + tierCost [currentTier]+" coins)";
 		UpdateCoins ();
 	}
+
 
 	//carga los unlockables del tier indicado
 	public void LoadTier(int tier)
