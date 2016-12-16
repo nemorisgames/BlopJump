@@ -32,6 +32,8 @@ public class GameController : MonoBehaviour
 	int coinGrabHeight;
 	int airCoins;
 
+	int rounds = 0;
+
 	[Header("Diver")]
 	public GameObject diverGameObject; //diver en uso
 	public Vector3 diverJumpForce; //vector fuerza para el salto
@@ -368,6 +370,10 @@ public class GameController : MonoBehaviour
 		maxHeight = 0;
 		coinGrabHeight = 1;
 		coinSpawner.Init ();
+		rounds++;
+		if (rounds > 0 && rounds % 10 == 0) {
+			controller.bg.change ();
+		}
 	}
 
 	void DiverJump(Vector3 jumpForce)

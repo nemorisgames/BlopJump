@@ -39,6 +39,8 @@ public class MainController : MonoBehaviour
 	int jumperKeyAux;
 	int platformKeyAux;
 
+	public BackgroundChange bg;
+
 	//[HideInInspector]
 	public bool selectScreenVisible = false;
 	UILabel coinsLabel;
