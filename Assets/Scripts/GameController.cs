@@ -98,6 +98,7 @@ public class GameController : MonoBehaviour
     public AudioClip[] waterSFX;
     public AudioClip[] blobSFX;
     public AudioClip[] jumperSFX;
+    public AudioClip[] coinsSFX;
 
 	private bool canJump;
 
@@ -190,6 +191,8 @@ public class GameController : MonoBehaviour
 	}
 
 	IEnumerator CreatePlusCoin(){
+        int c = Mathf.RoundToInt(Random.Range(0, 1));
+        PlaySFX(coinsSFX[c]);
 		GameObject plus = (GameObject)Instantiate (coin, new Vector3 (diverRigidbody.position.x + 0.5f, diverRigidbody.position.y, diverRigidbody.position.z), coin.transform.rotation);
 		yield return new WaitForSeconds (1f);
 		Destroy (plus);
