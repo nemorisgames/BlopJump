@@ -297,13 +297,14 @@ public class MainController : MonoBehaviour
 			diverKey = 0; //wetsuit diver
 			jumperKey = 6; //normal jumper
 			platformKey = 11; //metal platform
+			UpdateGearPrefs();
 			PlayerPrefs.SetInt("notFirstTime",1);
 		} else {
 			diverKey = PlayerPrefs.GetInt ("lastDiver");
 			jumperKey = PlayerPrefs.GetInt ("lastJumper");
 			platformKey = PlayerPrefs.GetInt ("lastPlatform");
 		}
-		Unlockable u = null;
+		Unlockable u;
 		if (unlockables.TryGetValue (diverKey, out u)) 
 		{
 			if(!u.unlocked){
