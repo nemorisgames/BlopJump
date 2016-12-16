@@ -370,10 +370,10 @@ public class GameController : MonoBehaviour
 		maxHeight = 0;
 		coinGrabHeight = 1;
 		coinSpawner.Init ();
-		rounds++;
-		if (rounds > 0 && rounds % 10 == 0) {
+		if (rounds > 0 && rounds % controller.roundsToChange == 0) {
 			controller.bg.change ();
 		}
+		rounds++;
 	}
 
 	void DiverJump(Vector3 jumpForce)

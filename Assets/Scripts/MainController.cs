@@ -40,6 +40,7 @@ public class MainController : MonoBehaviour
 	int platformKeyAux;
 
 	public BackgroundChange bg;
+	public int roundsToChange;
 
 	//[HideInInspector]
 	public bool selectScreenVisible = false;
