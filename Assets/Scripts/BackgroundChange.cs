@@ -12,6 +12,8 @@ public class BackgroundChange : MonoBehaviour {
 
 	public void change(){
 		indice++;
+		if (indice >= fondos.Length)
+			indice = 0;
 		for (int i = 0; i < fondos.Length; i++) {
 			fondos [i].SetActive (i == indice);
 		}
