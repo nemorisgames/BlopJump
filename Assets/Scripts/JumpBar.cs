@@ -44,6 +44,8 @@ public class JumpBar : MonoBehaviour {
 		} 
 		else 
 		{
+			if(jumpBar == null) 
+				jumpBar = GetComponent<UISlider> ();
 			if (jumpBar.value <= 0) 
 			{
 				jumpBarForward = true;
