@@ -75,6 +75,7 @@ public class MainController : MonoBehaviour
 		ToggleButtons (false);
 		if (PlayerPrefs.GetInt ("notFirstTime") == 1) {
 			ToggleButtons (true);
+			rewardButton.SetActive (false);
 		}
 		rewardMachine.LoadTier (0);
 	}
@@ -333,7 +334,7 @@ public class MainController : MonoBehaviour
 	}
 
 	public void CheckOpenScreens(){
-		if (!selectScreenVisible && !rewardMachine.rewardScreenVisible && gameController.controllingDiver) {
+		if (!selectScreenVisible && !rewardMachine.rewardScreenVisible && (gameController.controllingDiver || !gameController.controllingDiver && gameController.rounds == 0)) {
 			gameController.ResetRound ();
 			gameController.jumpBar.Initialize ();
 		}
@@ -341,23 +342,21 @@ public class MainController : MonoBehaviour
 
 	public void CloseWindow()
 	{
-		if (restartAllowed) {
-			if (selectScreenVisible) {
-				ToggleSelectScreen ();
-				LastLoadout ();
-				if (gameController.controllingDiver) {
-					gameController.ResetRound ();
-				}
-			} else if (rewardMachine.rewardScreenVisible) {
-				rewardMachine.ToggleRewardScreen ();
-				if (gameController.controllingDiver) {
-					gameController.ResetRound ();
-				}
-			} else if (gameController.endRoundScreenVisible) {
-				gameController.ToggleEndRoundScreen ();
+		if (selectScreenVisible) {
+			ToggleSelectScreen ();
+			LastLoadout ();
+			if (gameController.controllingDiver || gameController.rounds == 0) {
 				gameController.ResetRound ();
-				restartAllowed = false;
 			}
+		} else if (rewardMachine.rewardScreenVisible) {
+			rewardMachine.ToggleRewardScreen ();
+			if (gameController.controllingDiver) {
+				gameController.ResetRound ();
+			}
+		} else if (gameController.endRoundScreenVisible && restartAllowed) {
+			gameController.ToggleEndRoundScreen ();
+			gameController.ResetRound ();
+			restartAllowed = false;
 		}
 	}
 

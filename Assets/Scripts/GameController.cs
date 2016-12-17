@@ -32,7 +32,7 @@ public class GameController : MonoBehaviour
 	int coinGrabHeight;
 	int airCoins;
 
-	int rounds = 0;
+	public int rounds = 0;
 
 	[Header("Diver")]
 	public GameObject diverGameObject; //diver en uso
@@ -220,7 +220,7 @@ public class GameController : MonoBehaviour
 
 	public void Setup()
 	{
-		/*if (diver != null) 
+		if (diver != null) 
 		{
 			Destroy (diver);
 		}
@@ -233,7 +233,7 @@ public class GameController : MonoBehaviour
 		if (platform != null) 
 		{
 			Destroy (platform);
-		}*/
+		}
 
 		enableWind = false;
 
@@ -459,20 +459,16 @@ public class GameController : MonoBehaviour
 		foreach (Transform t in coinSpawner.transform){
 			landingCoins--;
 		}
+		endRoundFlipCoins.text = "+ 0 coins";
+		endRoundHeightCoins.text = "+ 0 coins";
+		endRoundLandingCoins.text = "+ 0 coins";
+		endRoundTotalCoins.text = "Total coins: 0";
 		if (goodJump) {
 			endRoundJump.text = "Good Jump!";
-			/*controller.coins += flipCoins + heightCoins + landingCoins;
-			endRoundFlipCoins.text = "+ " + flipCoins + " coins";
-			endRoundHeightCoins.text = "+ " + heightCoins + " coins";
-			endRoundLandingCoins.text = "+ " + landingCoins + " coins";
-			endRoundTotalCoins.text = "Total coins: " + (flipCoins + heightCoins + landingCoins);*/
 			StartCoroutine (EndScreenCoinsEffect (flipCoins, heightCoins, landingCoins));
 		} else {
-			endRoundFlipCoins.text = "+ 0 coins";
-			endRoundHeightCoins.text = "+ 0 coins";
-			endRoundLandingCoins.text = "+ 0 coins";
 			endRoundJump.text = "Bad Jump!";
-			endRoundTotalCoins.text = "Total coins: 0";
+			StartCoroutine (controller.enableRestart (2f));
 		}
 
 	}
