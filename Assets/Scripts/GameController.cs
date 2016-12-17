@@ -468,7 +468,7 @@ public class GameController : MonoBehaviour
 			StartCoroutine (EndScreenCoinsEffect (flipCoins, heightCoins, landingCoins));
 		} else {
 			endRoundJump.text = "Bad Jump!";
-			StartCoroutine (controller.enableRestart (2f));
+			StartCoroutine (controller.enableRestart (1.5f));
 		}
 
 	}
@@ -488,8 +488,9 @@ public class GameController : MonoBehaviour
 		//yield return new WaitForSeconds (f2 * flipCoins + heightCoins + landingCoins);
 		//endRoundTotalCoins.text = "Total coins: " + (flipCoins + heightCoins + landingCoins);
 		StartCoroutine(EndScreenTotalText(endRoundTotalCoins,flipCoins + heightCoins + landingCoins,f2));
-		yield return new WaitForSeconds (f2 * flipCoins + heightCoins + landingCoins);
+		yield return new WaitForSeconds (f2 * (flipCoins + heightCoins + landingCoins));
 		//controller.coins += flipCoins + heightCoins + landingCoins;
+		//Debug.Log("done");
 		StartCoroutine (controller.enableRestart (0.1f));
 	}
 
@@ -513,7 +514,7 @@ public class GameController : MonoBehaviour
 	}
 
 	public void ToggleEndRoundScreen(){
-		if (endRoundScreenVisible) 
+		if (endRoundScreenVisible && controller.restartAllowed) 
 		{
 			endRoundScreenVisible = false;
 			//endRoundScreen.SetActive (false);
@@ -532,6 +533,12 @@ public class GameController : MonoBehaviour
 			//EndRound ();
 			controller.disableRestart();
 			//StartCoroutine (controller.enableRestart (2f));
+		}
+	}
+
+	public void PlayAgainButton(){
+		if (controller.restartAllowed) {
+			ResetRound ();
 		}
 	}
 
