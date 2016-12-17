@@ -10,7 +10,7 @@ public class Coin : MonoBehaviour {
 	void Awake(){
 		controller = GameObject.FindGameObjectWithTag ("MainController").GetComponent<MainController>();
         t = GetComponent<Transform>();
-		t.Rotate(Vector3.forward * 90);
+		t.Rotate(0f, Random.Range(0f, 180f), 90f);
 	}
 
     void Update()

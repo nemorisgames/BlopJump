@@ -27,7 +27,12 @@ public class BuoyController : MonoBehaviour {
             else
                 r = Quaternion.identity;
             
-            Instantiate(buoyPrefab, p, r, _t);
+			GameObject g = (GameObject)Instantiate(buoyPrefab, p, r, _t);
+			TweenPosition tp = g.GetComponent<TweenPosition> ();
+			tp.from = g.transform.localPosition - new Vector3 (0f, 0.1f, 0f);
+			tp.to = g.transform.localPosition;
+			tp.duration = Random.Range (0.8f, 1.2f);
+			tp.delay = Random.Range (0f, 1f);
         }
 
 	}

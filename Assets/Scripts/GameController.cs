@@ -311,6 +311,8 @@ public class GameController : MonoBehaviour
 	public void EndRound(){
 		//ToggleEndRoundScreen ();
 
+		Time.timeScale = 1f;
+		Time.fixedDeltaTime = 0.02f * Time.timeScale;
 		GetComponent<Animator> ().SetBool ("onAction", false);
 		jumpBar.gameObject.SetActive (false);
 		playing = false;
@@ -617,6 +619,7 @@ public class GameController : MonoBehaviour
             if (!sourceSFX[i].isPlaying)
             {
                 sourceSFX[i].clip = clip;
+				sourceSFX [i].pitch = Random.Range (1f, 1.1f);
                 sourceSFX[i].Play();
                 break;
             }

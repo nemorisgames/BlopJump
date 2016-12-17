@@ -33,6 +33,8 @@ public class CameraController : MonoBehaviour {
 		platformButton = GameObject.Find ("PlatformButton");
 		platformButtonLabel = platformButton.GetComponentInChildren<UILabel> ();
 		platformButton.SetActive (false);
+		Time.timeScale = 1f;
+		Time.fixedDeltaTime = 0.02f * Time.timeScale;
 	}
 
 	// Update is called once per frame
@@ -49,6 +51,12 @@ public class CameraController : MonoBehaviour {
 						newPos = newPos + new Vector3 (diverOffset.x, diverOffset.y, initialDepth - newPos.y / depthOffset);
 					else
 						newPos = newPos + new Vector3 (diverOffset.x, diverOffset.y, initialDepth - depthOffset);
+
+					if (target.position.y < 4f && Vector3.Distance (gameController.GetLandingSpot ().transform.position, target.position) < 5f) {
+						print ("aqui");
+						Time.timeScale = Mathf.Lerp(Time.timeScale, 0.2f, 10f * Time.deltaTime);
+						Time.fixedDeltaTime = 0.02f * Time.timeScale;
+					}
 				}
 				if (target.tag == "Jumper") {
 					//transform.position = new Vector3 (newPos.x + jumperOffset.x + platformOffset.x, newPos.y + jumperOffset.y + platformOffset.y, newPos.z + initialDepth);
