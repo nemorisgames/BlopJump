@@ -91,6 +91,7 @@ public class GameController : MonoBehaviour
 	[Header("Particles")]
 	public GameObject splashBlop;
 	public GameObject splashDiver;
+    public GameObject fireWorks;
 
 	float maxHeight;
 	bool splash;
@@ -101,6 +102,7 @@ public class GameController : MonoBehaviour
     public AudioClip[] blobSFX;
     public AudioClip[] jumperSFX;
     public AudioClip[] coinsSFX;
+    public AudioClip[] fireWorkSFX;
 
 	private bool canJump;
 
@@ -169,7 +171,7 @@ public class GameController : MonoBehaviour
 						DiverNormalSpin ();
 					}
 					if (diverRigidbody.position.y < 0.11 && !splash) {
-                        PlaySFX(waterSFX[2]);
+                        PlaySFX(waterSFX[2], 1.0f);
 						Instantiate (splashDiver, diverRigidbody.transform.position, splashDiver.transform.rotation);
 						splash = true;
 					}
@@ -194,7 +196,7 @@ public class GameController : MonoBehaviour
 
 	IEnumerator CreatePlusCoin(){
         int c = Mathf.RoundToInt(Random.Range(0, 1));
-        PlaySFX(coinsSFX[c]);
+        PlaySFX(coinsSFX[c], 0.8f);
 		GameObject plus = (GameObject)Instantiate (coin, new Vector3 (diverRigidbody.position.x + 0.5f, diverRigidbody.position.y, diverRigidbody.position.z), coin.transform.rotation);
 		yield return new WaitForSeconds (1f);
 		Destroy (plus);
@@ -418,9 +420,9 @@ public class GameController : MonoBehaviour
 	{
 		if(other.tag == "Jumper")
 		{
-            PlaySFX(waterSFX[4]);
+            PlaySFX(waterSFX[4], 1.0f);
 
-            PlaySFX(blobSFX[0]);
+            PlaySFX(blobSFX[0], 1.0f);
 
 			Instantiate (splashBlop, splashBlop.transform.position, splashBlop.transform.rotation);
 			GetComponent<Animator>().SetBool("onAction", true);
@@ -466,6 +468,7 @@ public class GameController : MonoBehaviour
 		endRoundTotalCoins.text = "Total coins: 0";
 		if (goodJump) {
 			endRoundJump.text = "Good Jump!";
+            StartCoroutine(FireWorksEffect(1.0f));
 			StartCoroutine (EndScreenCoinsEffect (flipCoins, heightCoins, landingCoins));
 		} else {
 			endRoundJump.text = "Bad Jump!";
@@ -474,6 +477,15 @@ public class GameController : MonoBehaviour
 
 	}
 
+
+    IEnumerator FireWorksEffect(float wait)
+    {
+        yield return new WaitForSeconds(wait);
+        Instantiate(fireWorks, new Vector3(35.3f, 2.8f, 47.4f)
+                , Quaternion.identity);
+        PlaySFX(fireWorkSFX[0], 1.2f);
+        PlaySFX(fireWorkSFX[1], 0.8f);
+    }
 
 	IEnumerator EndScreenCoinsEffect(int flipCoins, int heightCoins, int landingCoins){
 		float f1 = 0.1f;
@@ -499,7 +511,7 @@ public class GameController : MonoBehaviour
 		for (int i = 0; i < amount; i++) {
 			label.text = "+ " + i + " coins";
 			int c = Mathf.RoundToInt(Random.Range(0, 1));
-			PlaySFX(coinsSFX[c]);
+			PlaySFX(coinsSFX[c], 0.8f);
 			yield return new WaitForSeconds (f);
 		}
 	}
@@ -509,7 +521,7 @@ public class GameController : MonoBehaviour
 			label.text = "Total coins: " + i;
 			controller.coins ++;
 			int c = Mathf.RoundToInt(Random.Range(0, 1));
-			PlaySFX(coinsSFX[c]);
+			PlaySFX(coinsSFX[c], 0.8f);
 			yield return new WaitForSeconds (f);
 		}
 	}
@@ -603,7 +615,7 @@ public class GameController : MonoBehaviour
         if (str == "Effort")
         {
             int i = Mathf.RoundToInt(Random.Range(0, jumperSFX.Length));
-            PlaySFX(jumperSFX[i]);
+            PlaySFX(jumperSFX[i], 1.0f);
         }
 		if (str == "Jump" && canJump)
         {
@@ -616,13 +628,14 @@ public class GameController : MonoBehaviour
 
     }
 	
-    void PlaySFX(AudioClip clip)
+    void PlaySFX(AudioClip clip, float volume)
     {
         for (int i = 0; i < sourceSFX.Length; i++)
         {
             if (!sourceSFX[i].isPlaying)
             {
                 sourceSFX[i].clip = clip;
+                sourceSFX[i].volume = volume;
 				sourceSFX [i].pitch = Random.Range (1f, 1.1f);
                 sourceSFX[i].Play();
                 break;
