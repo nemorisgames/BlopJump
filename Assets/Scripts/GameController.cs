@@ -350,7 +350,8 @@ public class GameController : MonoBehaviour
 		diverRigidbody.rotation = diverPos.rotation;
 		diverRigidbody.position = diverPos.position;
 		jumperRigidbody.position = jumperPos;
-		canJump = true;
+        GetComponent<Animator>().SetBool("onAction", false);
+        canJump = true;
 	}
 
 	public void ResetRound() //reubica la cámara, muestra pantalla de fin de ronda
