@@ -313,6 +313,7 @@ public class GameController : MonoBehaviour
 
 		Time.timeScale = 1f;
 		Time.fixedDeltaTime = 0.02f * Time.timeScale;
+		//cam.fieldOfView = 60f;
 		GetComponent<Animator> ().SetBool ("onAction", false);
 		jumpBar.gameObject.SetActive (false);
 		playing = false;

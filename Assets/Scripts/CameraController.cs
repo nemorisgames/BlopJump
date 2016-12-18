@@ -35,6 +35,7 @@ public class CameraController : MonoBehaviour {
 		platformButton.SetActive (false);
 		Time.timeScale = 1f;
 		Time.fixedDeltaTime = 0.02f * Time.timeScale;
+		//cam.fieldOfView = 60f;
 	}
 
 	// Update is called once per frame
@@ -56,6 +57,7 @@ public class CameraController : MonoBehaviour {
 						print ("aqui");
 						Time.timeScale = Mathf.Lerp(Time.timeScale, 0.2f, 10f * Time.deltaTime);
 						Time.fixedDeltaTime = 0.02f * Time.timeScale;
+						//cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, 40f, 3f * Time.deltaTime);
 					}
 				}
 				if (target.tag == "Jumper") {

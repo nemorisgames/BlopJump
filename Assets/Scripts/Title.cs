@@ -10,7 +10,7 @@ public class Title : MonoBehaviour {
 	}
 
 	IEnumerator playSplash(){
-		yield return new WaitForSeconds (2f);
+		yield return new WaitForSeconds (1.5f);
 		GetComponent<AudioSource> ().PlayOneShot (clip);
 	}
 
