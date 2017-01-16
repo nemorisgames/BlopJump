@@ -176,12 +176,14 @@ public class SpilGamesAPI : MonoBehaviour
 	public void pauseGame () 
 	{
 		debugText.text = "Game Paused";
+		Time.timeScale = 0;
 	}
 
 	//Enter the code here to resume your game after an AD
 	public void resumeGame () 
 	{
 		debugText.text = "Game Resumed";
+		Time.timeScale = 1;
 	}
 	
 	//call for a break in the game, this will most likely be an Ad but could be other branding
