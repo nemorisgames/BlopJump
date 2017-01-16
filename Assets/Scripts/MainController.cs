@@ -51,6 +51,7 @@ public class MainController : MonoBehaviour
 
 	[HideInInspector]
 	public bool restartAllowed = false;
+	[HideInInspector]
 
 	[Header("Ads")]
 	public GameObject ad;
@@ -78,6 +79,7 @@ public class MainController : MonoBehaviour
 			rewardButton.SetActive (false);
 		}
 		rewardMachine.LoadTier (0);
+		highScore = PlayerPrefs.GetInt ("highScore");
 	}
 
 	/*void Start(){

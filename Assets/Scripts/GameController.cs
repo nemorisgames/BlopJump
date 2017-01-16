@@ -83,6 +83,7 @@ public class GameController : MonoBehaviour
 	UILabel endRoundLandingCoins;
 	UILabel endRoundJump;
 	UILabel endRoundTotalCoins;
+	UILabel highScore;
 	LandingSpot landingSpot;
 	BoxCollider landingSpotBC;
 	public JumpBar jumpBar;
@@ -122,6 +123,7 @@ public class GameController : MonoBehaviour
 		endRoundLandingCoins = endRoundScreen.transform.FindChild ("EndLandingCoins").GetComponent<UILabel> ();
 		endRoundTotalCoins = endRoundScreen.transform.FindChild ("EndTotalCoins").GetComponent<UILabel> ();
 		endRoundJump = endRoundScreen.transform.FindChild ("EndRoundText").GetComponent<UILabel> ();
+		highScore = endRoundScreen.transform.FindChild ("HighScore").GetComponent<UILabel> ();
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
 		landingSpotBC = landingSpot.gameObject.GetComponent<BoxCollider> ();
 		jumpBar = GameObject.FindGameObjectWithTag ("JumpBar").GetComponent<JumpBar> ();
@@ -471,11 +473,16 @@ public class GameController : MonoBehaviour
 			endRoundJump.text = "Good Jump!";
             StartCoroutine(FireWorksEffect(1.0f));
 			StartCoroutine (EndScreenCoinsEffect (flipCoins, heightCoins, landingCoins));
+			if (flipCoins + heightCoins + landingCoins > controller.highScore) {
+				controller.highScore = flipCoins + heightCoins + landingCoins;
+				PlayerPrefs.SetInt ("highScore", controller.highScore);
+				controller.spilAPI.ScoreSubmit (controller.highScore);
+			}
 		} else {
 			endRoundJump.text = "Bad Jump!";
 			StartCoroutine (controller.enableRestart (1.5f));
 		}
-
+		highScore.text = "High Score: " + controller.highScore;
 	}
 
 
@@ -509,7 +516,7 @@ public class GameController : MonoBehaviour
 	}
 
 	IEnumerator EndScreenText(UILabel label, int amount, float f){
-		for (int i = 0; i < amount; i++) {
+		for (int i = 0; i <= amount; i++) {
 			label.text = "+ " + i + " coins";
 			int c = Mathf.RoundToInt(Random.Range(0, 1));
 			PlaySFX(coinsSFX[c], 0.8f);
@@ -518,7 +525,7 @@ public class GameController : MonoBehaviour
 	}
 
 	IEnumerator EndScreenTotalText(UILabel label, int amount, float f){
-		for (int i = 0; i < amount; i++) {
+		for (int i = 0; i <= amount; i++) {
 			label.text = "Total coins: " + i;
 			controller.coins ++;
 			int c = Mathf.RoundToInt(Random.Range(0, 1));
