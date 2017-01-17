@@ -179,10 +179,12 @@ public class MainController : MonoBehaviour
 	public void EnableAd(bool b){
 		if (b) {
 			bgForest.Pause ();
+			Camera.main.GetComponent<AudioSource> ().Pause ();
 			spilAPI.pauseGame ();
 			spilAPI.GameBreak ();
 			adWndw.SetActive (true);
 		} else {
+			Camera.main.GetComponent<AudioSource> ().UnPause ();
 			bgForest.UnPause ();
 		}
 		ad.SetActive (b);

@@ -31,12 +31,13 @@ public class InputController : MonoBehaviour {
 			} else {
 				cameraController.TogglePlatformView ();
 			}
-		} else {
-			controller.CloseWindow ();
 		}
-		if (Time.timeScale == 0) {
-			controller.adWndw.SetActive (false);
+		else if (controller.adWndw.activeSelf) {
+			//controller.adWndw.SetActive (false);
 			controller.spilAPI.resumeGame ();
+		}
+		else {
+			controller.CloseWindow ();
 		}
 	}
 }

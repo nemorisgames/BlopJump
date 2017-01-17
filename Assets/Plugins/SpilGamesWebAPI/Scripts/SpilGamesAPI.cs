@@ -25,6 +25,8 @@ public class SpilGamesAPI : MonoBehaviour
 	//have we recived the logo texture from the portal
 	private bool _hasTexture = false;
 
+	public GameObject adWndw;
+
 	string version = "0.0.8";
 	
 	void Start () 
@@ -176,16 +178,13 @@ public class SpilGamesAPI : MonoBehaviour
 	public void pauseGame () 
 	{
 		debugText.text = "Game Paused";
-		Time.timeScale = 0;
-		Camera.main.GetComponent<AudioSource> ().Pause ();
 	}
 
 	//Enter the code here to resume your game after an AD
 	public void resumeGame () 
 	{
+		adWndw.SetActive (false);
 		debugText.text = "Game Resumed";
-		Time.timeScale = 1;
-		Camera.main.GetComponent<AudioSource> ().UnPause ();
 	}
 	
 	//call for a break in the game, this will most likely be an Ad but could be other branding
