@@ -58,6 +58,7 @@ public class MainController : MonoBehaviour
 	public GameObject adWndw;
 
 	public AudioSource bgForest;
+	public AudioSource bgBirds;
 
 	// Use this for initialization
 	void Awake () 
@@ -179,6 +180,7 @@ public class MainController : MonoBehaviour
 	public void EnableAd(bool b){
 		if (b) {
 			bgForest.Pause ();
+			bgBirds.Pause ();
 			Camera.main.GetComponent<AudioSource> ().Pause ();
 			spilAPI.pauseGame ();
 			spilAPI.GameBreak ();
@@ -186,6 +188,7 @@ public class MainController : MonoBehaviour
 		} else {
 			Camera.main.GetComponent<AudioSource> ().UnPause ();
 			bgForest.UnPause ();
+			bgBirds.UnPause ();
 		}
 		ad.SetActive (b);
 	}
