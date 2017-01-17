@@ -51,7 +51,6 @@ public class MainController : MonoBehaviour
 
 	[HideInInspector]
 	public bool restartAllowed = false;
-	[HideInInspector]
 
 	[Header("Ads")]
 	public GameObject ad;
