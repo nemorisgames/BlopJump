@@ -480,6 +480,7 @@ public class GameController : MonoBehaviour
 			}
 		} else {
 			endRoundJump.text = "Bad Jump!";
+			StartCoroutine (waitForAd ());
 			StartCoroutine (controller.enableRestart (1.5f));
 		}
 		highScore.text = "High Score: " + controller.highScore;
@@ -512,6 +513,8 @@ public class GameController : MonoBehaviour
 		yield return new WaitForSeconds (f2 * (flipCoins + heightCoins + landingCoins));
 		//controller.coins += flipCoins + heightCoins + landingCoins;
 		//Debug.Log("done");
+		yield return new WaitForSeconds(0.1f);
+		controller.EnableAd(true);
 		StartCoroutine (controller.enableRestart (0.1f));
 	}
 
@@ -550,9 +553,9 @@ public class GameController : MonoBehaviour
 			endRoundScreenVisible = true;
 			endRoundScreen.GetComponent<TweenAlpha>().PlayForward();
 			//endRoundScreen.SetActive (true);
-			controller.EnableAd (true);
 			//EndRound ();
 			controller.disableRestart();
+			//StartCoroutine(waitForAd());
 			//StartCoroutine (controller.enableRestart (2f));
 		}
 	}
@@ -650,5 +653,10 @@ public class GameController : MonoBehaviour
             }
         }
     }
+
+	IEnumerator waitForAd(){
+		yield return new WaitForSeconds (0.5f);
+		controller.EnableAd (true);
+	}
 
 }

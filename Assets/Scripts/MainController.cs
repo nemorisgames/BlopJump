@@ -55,6 +55,9 @@ public class MainController : MonoBehaviour
 	[Header("Ads")]
 	public GameObject ad;
 	public SpilGamesAPI spilAPI;
+	public GameObject adWndw;
+
+	public AudioSource bgForest;
 
 	// Use this for initialization
 	void Awake () 
@@ -71,7 +74,7 @@ public class MainController : MonoBehaviour
 		coinsLabel = GameObject.Find ("Coins").GetComponent<UILabel> ();
 		distance = GameObject.Find ("Distance");
 		//distanceLabel = distance.GetComponent<UILabel> ();
-		EnableAd (false);
+		EnableAd (true);
 		ToggleButtons (false);
 		if (PlayerPrefs.GetInt ("notFirstTime") == 1) {
 			ToggleButtons (true);
@@ -175,7 +178,12 @@ public class MainController : MonoBehaviour
 
 	public void EnableAd(bool b){
 		if (b) {
+			bgForest.Pause ();
+			spilAPI.pauseGame ();
 			spilAPI.GameBreak ();
+			adWndw.SetActive (true);
+		} else {
+			bgForest.UnPause ();
 		}
 		ad.SetActive (b);
 	}

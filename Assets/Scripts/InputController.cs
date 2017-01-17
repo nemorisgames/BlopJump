@@ -22,6 +22,7 @@ public class InputController : MonoBehaviour {
 			controller.tutorialScreen.PlayReverse ();
 			//gameController.Setup ();
 			gameController.ResetRound ();
+			controller.EnableAd (false);
 			controller.ToggleButtons (false);
 		} 
 		if (gameController.waiting && gameController.controllingJumper && !gameController.controllingDiver) {
@@ -32,6 +33,10 @@ public class InputController : MonoBehaviour {
 			}
 		} else {
 			controller.CloseWindow ();
+		}
+		if (Time.timeScale == 0) {
+			controller.adWndw.SetActive (false);
+			controller.spilAPI.resumeGame ();
 		}
 	}
 }

@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class Title : MonoBehaviour {
 	public AudioClip clip;
+	public SpilGamesAPI api;
 	// Use this for initialization
 	void Start () {
 		StartCoroutine (playSplash());
