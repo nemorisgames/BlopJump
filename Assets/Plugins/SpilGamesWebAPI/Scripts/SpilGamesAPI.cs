@@ -183,7 +183,8 @@ public class SpilGamesAPI : MonoBehaviour
 	//Enter the code here to resume your game after an AD
 	public void resumeGame () 
 	{
-		adWndw.SetActive (false);
+		if(adWndw != null)
+			adWndw.SetActive (false);
 		debugText.text = "Game Resumed";
 	}
 	
