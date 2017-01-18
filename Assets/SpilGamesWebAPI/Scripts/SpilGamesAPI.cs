@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using UnityEngine.UI;
+using BlopJump;
 
 public class SpilGamesAPI : MonoBehaviour 
 {
@@ -26,6 +27,7 @@ public class SpilGamesAPI : MonoBehaviour
 	private bool _hasTexture = false;
 
 	public GameObject adWndw;
+	public MainController controller;
 
 	string version = "0.0.8";
 	
@@ -185,6 +187,7 @@ public class SpilGamesAPI : MonoBehaviour
 	{
 		if(adWndw != null)
 			adWndw.SetActive (false);
+		controller.EnableAd (false);
 		debugText.text = "Game Resumed";
 	}
 	

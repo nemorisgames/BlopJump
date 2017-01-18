@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using BlopJump;
 
 [System.Serializable]
 public class GameController : MonoBehaviour 
