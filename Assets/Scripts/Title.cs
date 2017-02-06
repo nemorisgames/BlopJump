@@ -5,9 +5,12 @@ using UnityEngine.SceneManagement;
 public class Title : MonoBehaviour {
 	public AudioClip clip;
 	public SpilGamesAPI api;
+	public UILabel muteLabel;
+	public UISprite muteButton;
 	// Use this for initialization
 	void Start () {
 		StartCoroutine (playSplash());
+		muteButton.alpha = 0;
 	}
 
 	IEnumerator playSplash(){
@@ -22,5 +25,17 @@ public class Title : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
+	}
+
+	public void MuteButton(){
+		if (PlayerPrefs.GetInt ("Muted") == 0) {
+			PlayerPrefs.SetInt ("Muted", 1);
+			Camera.main.GetComponent<AudioSource> ().mute = true;
+			muteLabel.text = "Unmute\nAudio";
+		} else {
+			PlayerPrefs.SetInt ("Muted", 0);
+			Camera.main.GetComponent<AudioSource> ().mute = false;
+			muteLabel.text = "Mute\nAudio";
+		}
 	}
 }

@@ -30,6 +30,7 @@ namespace BlopJump{
 		public float boxDistance;
 		public GameObject rewardButton;
 		public GameObject inventoryButton;
+		public GameObject muteButton;
 
 		[HideInInspector]
 		public int diverKey;
@@ -94,6 +95,9 @@ namespace BlopJump{
 
 		void Start(){
 			gameController.Setup ();
+			if (PlayerPrefs.GetInt ("Muted") == 1) {
+				MuteAudio (true);
+			}
 		}
 
 		// Update is called once per frame
@@ -181,18 +185,41 @@ namespace BlopJump{
 
 		public void EnableAd(bool b){
 			if (b) {
-				bgForest.Pause ();
-				bgBirds.mute = true;
-				Camera.main.GetComponent<AudioSource> ().Pause ();
+				PauseAudio (true);
 				spilAPI.pauseGame ();
 				spilAPI.GameBreak ();
 				adWndw.SetActive (true);
 			} else {
-				Camera.main.GetComponent<AudioSource> ().UnPause ();
-				bgForest.UnPause ();
-				bgBirds.mute = false;
+				PauseAudio (false);
 			}
 			ad.SetActive (b);
+		}
+
+		public void MuteAudio(bool mute){
+			if (mute) {
+				Camera.main.GetComponent<AudioSource> ().mute = true;
+			} else {
+				Camera.main.GetComponent<AudioSource> ().mute = false;
+			}
+		}
+
+		public void PauseAudio(bool mute){
+			if (mute) {
+				Camera.main.GetComponent<AudioSource> ().Pause ();
+				bgForest.Pause ();
+				bgBirds.mute = mute;
+			} else {
+				if (PlayerPrefs.GetInt ("Muted") == 0) {
+					Camera.main.GetComponent<AudioSource> ().UnPause ();
+				}
+				bgForest.UnPause ();
+				bgBirds.mute = mute;
+			}
+		}
+
+		public void MuteButton(){
+			PlayerPrefs.SetInt ("Muted", 1);
+			Camera.main.GetComponent<AudioSource> ().mute = true;
 		}
 
 		public void ToggleSelectScreen(){
@@ -406,6 +433,7 @@ namespace BlopJump{
 
 		void OnApplicationQuit(){
 			PlayerPrefs.SetInt ("Coins", coins);
+			PlayerPrefs.SetInt ("Muted", 0);
 		}
 
 		void UpdateGearPrefs(){

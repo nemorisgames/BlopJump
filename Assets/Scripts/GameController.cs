@@ -383,6 +383,9 @@ public class GameController : MonoBehaviour
 			controller.bg.change ();
 		}
 		rounds++;
+		if (PlayerPrefs.GetInt ("Muted") == 1) {
+			controller.MuteAudio (true);
+		}
 	}
 
 	void DiverJump(Vector3 jumpForce)
