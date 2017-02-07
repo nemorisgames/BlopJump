@@ -243,7 +243,6 @@ public class SpilGamesAPI : MonoBehaviour
 		if (_logo != null) {
 			Application.ExternalEval ("GameAPI.Branding.getLogo().action();");
 		}
-		ShowSpilMoreGames ();
 	}
 
 }

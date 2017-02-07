@@ -7,10 +7,12 @@ public class Title : MonoBehaviour {
 	public SpilGamesAPI api;
 	public UILabel muteLabel;
 	public UISprite muteButton;
+	public UISprite moreGames;
 	// Use this for initialization
 	void Start () {
 		StartCoroutine (playSplash());
 		muteButton.alpha = 0;
+		moreGames.alpha = 0;
 	}
 
 	IEnumerator playSplash(){

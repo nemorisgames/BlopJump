@@ -85,6 +85,7 @@ public class GameController : MonoBehaviour
 	UILabel endRoundJump;
 	UILabel endRoundTotalCoins;
 	UILabel highScore;
+	UILabel muteLabel;
 	LandingSpot landingSpot;
 	BoxCollider landingSpotBC;
 	public JumpBar jumpBar;
@@ -125,6 +126,10 @@ public class GameController : MonoBehaviour
 		endRoundTotalCoins = endRoundScreen.transform.FindChild ("EndTotalCoins").GetComponent<UILabel> ();
 		endRoundJump = endRoundScreen.transform.FindChild ("EndRoundText").GetComponent<UILabel> ();
 		highScore = endRoundScreen.transform.FindChild ("HighScore").GetComponent<UILabel> ();
+		muteLabel = endRoundScreen.transform.FindChild ("MuteButton").GetComponentInChildren<UILabel> ();
+		if (PlayerPrefs.GetInt ("Muted") == 1) {
+			muteLabel.text = "Unmute\nAudio";
+		}
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
 		landingSpotBC = landingSpot.gameObject.GetComponent<BoxCollider> ();
 		jumpBar = GameObject.FindGameObjectWithTag ("JumpBar").GetComponent<JumpBar> ();
@@ -661,6 +666,18 @@ public class GameController : MonoBehaviour
 	IEnumerator waitForAd(){
 		yield return new WaitForSeconds (0.5f);
 		controller.EnableAd (true);
+	}
+
+	public void MuteButton(){
+		if (PlayerPrefs.GetInt ("Muted") == 0) {
+			PlayerPrefs.SetInt ("Muted", 1);
+			Camera.main.GetComponent<AudioSource> ().mute = true;
+			muteLabel.text = "Unmute\nAudio";
+		} else {
+			PlayerPrefs.SetInt ("Muted", 0);
+			Camera.main.GetComponent<AudioSource> ().mute = false;
+			muteLabel.text = "Mute\nAudio";
+		}
 	}
 
 }
