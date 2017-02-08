@@ -166,7 +166,7 @@ public class RewardMachine : MonoBehaviour {
 				rewardScreen.GetComponent<TweenAlpha>().PlayReverse();
 				//rewardScreen.SetActive (false);
 				rewardScreenVisible = false;
-				controller.EnableAd (false);
+				//controller.EnableAd (false);
 
 			} else {
 
@@ -189,7 +189,7 @@ public class RewardMachine : MonoBehaviour {
 				//rewardScreen.SetActive (true);
 				rewardScreen.GetComponent<TweenAlpha>().PlayForward();
 				rewardScreenVisible = true;
-				controller.EnableAd (true);
+				//controller.EnableAd (true);
 			}
 
 		}

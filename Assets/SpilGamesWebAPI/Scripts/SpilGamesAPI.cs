@@ -187,7 +187,6 @@ public class SpilGamesAPI : MonoBehaviour
 	{
 		if(adWndw != null)
 			adWndw.SetActive (false);
-		controller.EnableAd (false);
 		debugText.text = "Game Resumed";
 	}
 	

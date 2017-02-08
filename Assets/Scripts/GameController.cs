@@ -127,9 +127,6 @@ public class GameController : MonoBehaviour
 		endRoundJump = endRoundScreen.transform.FindChild ("EndRoundText").GetComponent<UILabel> ();
 		highScore = endRoundScreen.transform.FindChild ("HighScore").GetComponent<UILabel> ();
 		muteLabel = endRoundScreen.transform.FindChild ("MuteButton").GetComponentInChildren<UILabel> ();
-		if (PlayerPrefs.GetInt ("Muted") == 1) {
-			muteLabel.text = "Unmute\nAudio";
-		}
 		landingSpot = GameObject.FindGameObjectWithTag ("LandingSpot").GetComponent<LandingSpot> ();
 		landingSpotBC = landingSpot.gameObject.GetComponent<BoxCollider> ();
 		jumpBar = GameObject.FindGameObjectWithTag ("JumpBar").GetComponent<JumpBar> ();
@@ -138,6 +135,12 @@ public class GameController : MonoBehaviour
 
 		maxHeight = 0;
 		coinGrabHeight = 1;
+	}
+
+	void Start(){
+		if (PlayerPrefs.GetInt ("Muted") == 1) {
+			muteLabel.text = "Unmute\nAudio";
+		}
 	}
 
 	void FixedUpdate()
