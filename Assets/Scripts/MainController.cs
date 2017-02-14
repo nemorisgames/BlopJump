@@ -185,7 +185,6 @@ namespace BlopJump{
 
 		public void EnableAd(bool b){
 			if (b) {
-				PauseAudio (true);
 				spilAPI.pauseGame ();
 				spilAPI.GameBreak ();
 				adWndw.SetActive (true);

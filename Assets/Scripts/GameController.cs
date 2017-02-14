@@ -564,6 +564,7 @@ public class GameController : MonoBehaviour
 			controller.ToggleButtons (true);
 			endRoundScreenVisible = true;
 			endRoundScreen.GetComponent<TweenAlpha>().PlayForward();
+			controller.PauseAudio (true);
 			//endRoundScreen.SetActive (true);
 			//EndRound ();
 			controller.disableRestart();
