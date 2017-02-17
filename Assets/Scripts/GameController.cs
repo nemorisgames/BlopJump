@@ -675,11 +675,11 @@ public class GameController : MonoBehaviour
 	public void MuteButton(){
 		if (PlayerPrefs.GetInt ("Muted") == 0) {
 			PlayerPrefs.SetInt ("Muted", 1);
-			Camera.main.GetComponent<AudioSource> ().mute = true;
+			controller.MuteAudio (true);
 			muteLabel.text = "Unmute\nAudio";
 		} else {
 			PlayerPrefs.SetInt ("Muted", 0);
-			Camera.main.GetComponent<AudioSource> ().mute = false;
+			controller.MuteAudio (false);
 			muteLabel.text = "Mute\nAudio";
 		}
 	}

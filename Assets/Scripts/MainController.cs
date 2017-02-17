@@ -126,6 +126,10 @@ namespace BlopJump{
 					UnlockAll (true);
 					Debug.Log ("cheater!");
 				};
+
+				if (Input.GetKeyDown (KeyCode.P)) {
+					spilAPI.resumeGame ();
+				}
 			}
 		}
 
@@ -195,11 +199,21 @@ namespace BlopJump{
 		}
 
 		public void MuteAudio(bool mute){
-			if (mute) {
-				Camera.main.GetComponent<AudioSource> ().mute = true;
-			} else {
-				Camera.main.GetComponent<AudioSource> ().mute = false;
-			}
+			/*if (mute) {
+				Camera.main.GetComponent<AudioSource> ().mute = mute;
+				for (int i = 0; i < gameController.sourceSFX.Length; i++) {
+					gameController.sourceSFX [i].mute = mute;
+				}
+				bgBirds.mute = mute;
+				bgForest.mute = mute;
+			} else {*/
+				Camera.main.GetComponent<AudioSource> ().mute = mute;
+				for (int i = 0; i < gameController.sourceSFX.Length; i++) {
+					gameController.sourceSFX [i].mute = mute;
+				}
+				bgBirds.mute = mute;
+				bgForest.mute = mute;
+			//}
 		}
 
 		public void PauseAudio(bool mute){

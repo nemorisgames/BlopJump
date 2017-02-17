@@ -34,8 +34,7 @@ public class InputController : MonoBehaviour {
 			}
 		}
 		else if (controller.adWndw.activeSelf) {
-			controller.adWndw.SetActive (false);
-			controller.spilAPI.resumeGame ();
+			//controller.adWndw.SetActive (false);
 		}
 		else {
 			controller.CloseWindow ();
