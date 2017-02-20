@@ -192,10 +192,16 @@ namespace BlopJump{
 				spilAPI.pauseGame ();
 				spilAPI.GameBreak ();
 				adWndw.SetActive (true);
+				StartCoroutine (AdTimeout ());
 			} else {
 				PauseAudio (false);
 			}
 			ad.SetActive (b);
+		}
+
+		IEnumerator AdTimeout(){
+			yield return new WaitForSeconds (6f);
+			spilAPI.resumeGame ();
 		}
 
 		public void MuteAudio(bool mute){
