@@ -78,7 +78,7 @@ namespace BlopJump{
 			coinsLabel = GameObject.Find ("Coins").GetComponent<UILabel> ();
 			distance = GameObject.Find ("Distance");
 			//distanceLabel = distance.GetComponent<UILabel> ();
-			EnableAd (true);
+			//EnableAd (true);
 			ToggleButtons (false);
 			if (PlayerPrefs.GetInt ("notFirstTime") == 1) {
 				ToggleButtons (true);
